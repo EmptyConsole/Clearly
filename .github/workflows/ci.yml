@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Reads the pnpm version from "packageManager" in package.json.
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Tracked-file guard (no .env, keys or files over 5 MB)
+        run: pnpm check:tracked
+      - name: Markdown and ignore rules
+        run: pnpm check:ignore
+      # The video tool (M11) is built from source by fetch:heavy; its checksum is tied to
+      # Emscripten 7.0.0. The built core is cached on its inputs.
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 7.0.0
+          actions-cache-folder: emsdk-cache
+      - uses: actions/cache@v4
+        with:
+          path: apps/web/public/heavy/ffmpeg
+          key: ffmpeg-core-${{ hashFiles('scripts/ffmpeg-wasm/**', 'heavy-manifest.json') }}
+      - name: Heavy assets (RNNoise and later models; checksums verified)
+        run: pnpm fetch:heavy
+      - run: pnpm typecheck
+      - name: Lint and formatting
+        run: pnpm lint
+      - run: pnpm test
+      - name: Token contrast
+        run: pnpm check:tokens
+      - run: pnpm build
+      - name: App-shell size budget
+        run: pnpm check:size
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The video tool (M11) is built from source by fetch:heavy; its checksum is tied to
+      # Emscripten 7.0.0. The built core is cached on its inputs.
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 7.0.0
+          actions-cache-folder: emsdk-cache
+      - uses: actions/cache@v4
+        with:
+          path: apps/web/public/heavy/ffmpeg
+          key: ffmpeg-core-${{ hashFiles('scripts/ffmpeg-wasm/**', 'heavy-manifest.json') }}
+      - run: pnpm fetch:heavy
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      # The runner has no sound device. Chromium runs with a fake audio output, but Firefox and
+      # WebKit need a device for real-time Web Audio, so give them a virtual one (a null sink).
+      - name: Virtual sound device
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=virtual_out
+          pactl set-default-sink virtual_out
+      # The desktop project launches Electron, which needs a display on Linux.
+      - run: xvfb-run --auto-servernum pnpm test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: test-results/
+          retention-days: 7
+
+  lighthouse:
+    # Accessibility at least 95 on every main route (M10), against the production build.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @clearly/web build
+      - name: Lighthouse CI (accessibility >= 95)
+        run: pnpm dlx @lhci/cli@0.16.0 autorun
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: lighthouse
+          path: test-results/lighthouse/
+          retention-days: 7

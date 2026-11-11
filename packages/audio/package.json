@@ -1,0 +1,24 @@
+{
+  "name": "@clearly/audio",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Standard Web Audio graph construction shared by live playback and offline export.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.worklet.json && tsc -p tsconfig.worker.json && tsc -p tsconfig.harness.json && tsc -p tsconfig.nodetest.json",
+    "test": "vitest run --root ../.. --project audio",
+    "harness": "vite --config harness/vite.config.ts"
+  },
+  "dependencies": {
+    "@clearly/core": "workspace:*",
+    "@mediabunny/mp3-encoder": "1.62.1",
+    "mediabunny": "1.62.1"
+  },
+  "devDependencies": {
+    "vite": "8.3.7"
+  }
+}

@@ -1,0 +1,593 @@
+CLEARLY: STRINGS FOR REGULATORY REVIEW
+
+BEFORE ANY RELEASE: a qualified regulatory professional must review this file for each launch
+market (for example the US FDA, the EU under the Medical Device Regulation 2017/745, and the UK
+MHRA) before Clearly is released there. Regulatory status is decided by intended use: what the
+product, its words, its listings and its marketing say it is for. A disclaimer does not decide it.
+Nothing in this file is a regulatory opinion; the developers have not classified the product.
+
+Every user-facing string about results or health, and every claim Clearly makes anywhere (the
+app, the Hearing Check PDF, the installer and app metadata, and any store listing), for that
+review (RULES.md rule 1). Each entry: message id in apps/web/src/copy/en.ts (or the file), the
+text, where it is used, the milestone that added it, review status. Status for every entry: not
+yet reviewed.
+
+hearingCheck.results.refNote
+  Text: We compare each pitch with how your better ear heard the middle pitch, 1,000 Hz. This
+        works well when hearing has changed with age, but not for everyone.
+  Use:  Hearing Check results, next to the chart. Explains that loss is measured relative to the
+        better ear's 1 kHz result (packages/core/src/hearing/loss.ts).
+  Added: M01. Status: not yet reviewed.
+
+hearingCheck.results.estimatedBand
+  Text: Estimated between measured points
+  Use:  Label on result bands that were not measured but filled in by interpolation.
+  Added: M01. Status: not yet reviewed.
+
+M03 (2026-11-09): Hearing Check screens, results and PDF
+
+pre.accuracy
+  Text: Results depend on your headphones and volume, so use them as a guide rather than a
+        measurement.
+  Use:  Pre-check screen (/check/before).
+  Added: M03. Status: not yet reviewed.
+
+pre.consent
+  Text: I understand Clearly is not a medical device and its results are approximate. If I
+        notice sudden hearing change, a difference between my ears, ringing, dizziness or pain,
+        I will see a doctor or audiologist.
+  Use:  Pre-check screen, required checkbox.
+  Added: M03. Status: not yet reviewed.
+
+pre.item.volume
+  Text: Set your computer volume to about 40 percent.
+  Use:  Pre-check screen, list item 3.
+  Added: M03. Status: not yet reviewed.
+
+cal.reason
+  Text: Browsers cannot know how loud your headphones are, so Clearly measures against your own
+        comfortable level.
+  Use:  Calibration screen (/check/calibrate).
+  Added: M03. Status: not yet reviewed.
+
+stage.instruction
+  Text: Tap whenever you hear a beep, even a very faint one. Some beeps are too quiet to hear,
+        and that is normal.
+  Use:  Hearing Check stage (/check/test).
+  Added: M03. Status: not yet reviewed.
+
+profile.estimated
+  Text: Estimated
+  Use:  Badge on every Starter (Estimated) profile.
+  Added: M03. Status: not yet reviewed.
+
+profile.estimatedHint
+  Text: Based on your age range, not on a Hearing Check.
+  Use:  Explains the Estimated badge.
+  Added: M03. Status: not yet reviewed.
+
+starter.lead
+  Text: Hearing tends to change with age. Clearly uses typical hearing for your age range as a
+        starting point.
+  Use:  Starter screen (/check/starter).
+  Added: M03. Status: not yet reviewed.
+
+starter.done.body
+  Text: It is a gentle boost based on your age range. Listen to the difference, then measure
+        your hearing for a closer match.
+  Use:  Starter done screen.
+  Added: M03. Status: not yet reviewed.
+
+home.profileEstimated
+  Text: Estimated from your age range
+  Use:  Home profile card.
+  Added: M03. Status: not yet reviewed.
+
+results.shape.typical
+  Text: You heard the beeps at quiet levels across all pitches, close to typical hearing with
+        these headphones.
+  Use:  Results screen, plain sentence (shape rule typical).
+  Added: M03. Status: not yet reviewed.
+
+results.shape.high-pitch
+  Text: Quieter high-pitched sounds are harder for you to hear, which can make speech sound
+        muffled.
+  Use:  Results screen, plain sentence (shape rule high-pitch).
+  Added: M03. Status: not yet reviewed.
+
+results.shape.high-pitch-notch
+  Text: Some upper-middle pitches were harder for you to hear than the pitches around them,
+        which can make some speech sounds less clear.
+  Use:  Results screen, plain sentence (shape rule notch at 4 or 6 kHz).
+  Added: M03. Status: not yet reviewed.
+
+results.shape.low-pitch
+  Text: Quieter low-pitched sounds are harder for you to hear than high-pitched ones.
+  Use:  Results screen, plain sentence (shape rule low-pitch).
+  Added: M03. Status: not yet reviewed.
+
+results.shape.flat
+  Text: Quieter sounds are harder for you to hear at most pitches.
+  Use:  Results screen, plain sentence (shape rule flat).
+  Added: M03. Status: not yet reviewed.
+
+results.shape.mixed
+  Text: Some pitches were harder for you to hear than others.
+  Use:  Results screen, plain sentence (fallback).
+  Added: M03. Status: not yet reviewed.
+
+results.reliability.label
+  Text: How consistent your answers were
+  Use:  Results screen, reliability badge.
+  Added: M03. Status: not yet reviewed.
+
+results.reliability.HighHint
+  Text: Your answers were consistent.
+  Use:  Reliability badge, High.
+  Added: M03. Status: not yet reviewed.
+
+results.reliability.MediumHint
+  Text: Your answers were mostly consistent.
+  Use:  Reliability badge, Medium.
+  Added: M03. Status: not yet reviewed.
+
+results.reliability.LowHint
+  Text: Your answers were not consistent enough to use.
+  Use:  Reliability badge, Low.
+  Added: M03. Status: not yet reviewed.
+
+results.low.title
+  Text: Let's try that again somewhere quieter
+  Use:  Results screen heading when reliability is Low.
+  Added: M03. Status: not yet reviewed.
+
+results.low.keptPrevious
+  Text: Clearly is still using your previous sound profile.
+  Use:  Results screen, Low reliability with an earlier profile.
+  Added: M03. Status: not yet reviewed.
+
+results.low.noPrevious
+  Text: Clearly will use these results for now. A quieter retake will give a closer match.
+  Use:  Results screen, Low reliability with no earlier profile.
+  Added: M03. Status: not yet reviewed.
+
+results.active
+  Text: Clearly now uses these results for your sound.
+  Use:  Results screen, Medium or High reliability.
+  Added: M03. Status: not yet reviewed.
+
+results.referral.title
+  Text: A hearing check with a professional could help
+  Use:  Results screen, referral card (any referral flag).
+  Added: M03. Status: not yet reviewed.
+
+results.referral.body
+  Text: Some of your results show a pattern worth checking with a doctor or audiologist, such as
+        a difference between your ears or more loss than Clearly is designed for. This is not a
+        diagnosis.
+  Use:  Results screen, referral card.
+  Added: M03. Status: not yet reviewed.
+
+results.referral.continue
+  Text: You can still continue using Clearly.
+  Use:  Results screen, referral card.
+  Added: M03. Status: not yet reviewed.
+
+audiogram.desc
+  Text: Pitch runs from low on the left to high on the right. Lower down means a sound had to be
+        louder for you to hear it.
+  Use:  Hearing chart description (SVG desc), everywhere the chart appears.
+  Added: M03. Status: not yet reviewed.
+
+audiogram.axisLoss
+  Text: Extra loudness needed (dB)
+  Use:  Hearing chart vertical axis label.
+  Added: M03. Status: not yet reviewed.
+
+pdf.title
+  Text: Clearly hearing chart
+  Use:  Results PDF title.
+  Added: M03. Status: not yet reviewed.
+
+pdf.reliability
+  Text: Consistency of answers: {reliability}
+  Use:  Results PDF.
+  Added: M03. Status: not yet reviewed.
+
+pdf.disclaimer
+  Text: Clearly is not a medical device. These results show how you heard these sounds with
+        these headphones and are approximate. They are not a diagnosis. If you notice sudden
+        hearing change, a difference between your ears, ringing, dizziness or pain, see a doctor
+        or audiologist.
+  Use:  Results PDF footer.
+  Added: M03. Status: not yet reviewed.
+
+demo.noProfile
+  Text: You do not have a sound profile yet, so Enhanced sounds the same as Original.
+  Use:  Demo page (/audio) without a profile.
+  Added: M03. Status: not yet reviewed.
+
+M04 (2026-11-09): backups, sync, privacy. PRIVACY REVIEW NEEDED: these strings describe how
+health data is stored and shared; a privacy professional must review them as well.
+
+sync.body
+  Text: This creates an anonymous backup with no name or email. You get a code you can use to
+        restore your settings on another device. Your hearing results are stored on Clearly's
+        server, encrypted, and deleted after {months} months without use.
+  Use:  Settings, Back up and move to another device.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+sync.consent
+  Text: I agree that Clearly stores my hearing results and settings on its server, encrypted, to
+        back them up. I can delete them at any time.
+  Use:  Settings, consent checkbox before backup.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+sync.shareWarning
+  Text: This link contains your hearing results. Anyone with the link can see them, and it may
+        be saved in your browser history.
+  Use:  Settings, Share my profile link dialog.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+sync.deleteBody
+  Text: This deletes everything Clearly stored on its server for you. Your settings on this
+        device stay.
+  Use:  Settings, Delete cloud backup dialog.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+tip.persist
+  Text: Some browsers clear site data you haven't used for a while. Add Clearly to your Home
+        Screen and make a backup to keep your settings safe.
+  Use:  Home, one-time storage tip.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+privacy.audio
+  Text: Your audio never leaves your device. All sound processing happens on this device.
+  Use:  Privacy page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+privacy.local
+  Text: Your profiles and results are stored in this browser on this device. Clearly has no
+        accounts and does no tracking or analytics.
+  Use:  Privacy page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+privacy.syncWhat
+  Text: Clearly stores your profiles, settings and Hearing Check results on its server so you
+        can restore them elsewhere. Listening history is included only if you choose.
+  Use:  Privacy page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+privacy.syncHow
+  Text: The backup has no name or email. It is encrypted on the server. Codes and access keys
+        are stored only in scrambled form.
+  Use:  Privacy page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+privacy.syncNot
+  Text: The server never stores your audio, your IP address or details about your browser. Your
+        address is used briefly to stop misuse, then forgotten.
+  Use:  Privacy page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+privacy.syncLong
+  Text: A backup that is not used for {months} months is deleted automatically.
+  Use:  Privacy page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+privacy.syncDelete
+  Text: You can delete it at any time in Settings with "Delete cloud backup". Restore codes
+        expire after 24 hours and work once.
+  Use:  Privacy page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+privacy.healthTitle
+  Text: Hearing results are personal health information
+  Use:  Privacy page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+privacy.health
+  Text: Keep backup files and profile links as private as other personal documents. Anyone who has them
+        can see your results.
+  Use:  Privacy page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+privacy.feedback
+  Text: If you send feedback, Clearly stores your message and the app version, nothing else.
+  Use:  Privacy page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+feedback.sent
+  Text: This is exactly what will be sent:
+  Use:  Send feedback page.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+share.lead
+  Text: Someone shared a sound profile with you. Nothing is saved unless you choose to import
+        it.
+  Use:  Shared profile page (/share).
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+demo.mode.hint
+  Text: Adds three example profiles for showing Clearly to others. They are labelled Demo and
+        never backed up.
+  Use:  Settings, Demo mode.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+settings.profile.lead
+  Text: Each profile belongs to one pair of headphones, because every pair sounds a little
+        different. You can keep up to {n}.
+  Use:  Settings, Profiles.
+  Added: M04. Status: not yet reviewed (regulatory and privacy).
+
+M06 (2026-11-09): Night mode and Background cleanup
+
+cleanup.hintBody
+  Text: Your speech-in-noise result suggests it may help.
+  Use:  Clear Audio, one-time chip after a speech-in-noise result.
+  Added: M06. Status: not yet reviewed.
+
+cleanup.hint
+  Text: Try Background cleanup
+  Use:  Clear Audio, one-time chip.
+  Added: M06. Status: not yet reviewed.
+
+M08 (2026-11-09): Listening Health
+
+health.sin.purpose
+  Text: How well you follow speech when there is background noise.
+  Use:  Listening Health.
+  Added: M08. Status: not yet reviewed.
+
+sin.intro
+  Text: You will hear three numbers spoken over a rushing noise. Type the three numbers you
+        heard. If you are not sure, guess or press Not sure. It takes about 90 seconds.
+  Use:  Speech-in-noise check.
+  Added: M08. Status: not yet reviewed.
+
+sin.result.good
+  Text: In background noise you followed speech well.
+  Use:  Speech-in-noise result.
+  Added: M08. Status: not yet reviewed.
+
+sin.result.some
+  Text: In background noise you followed speech with some effort.
+  Use:  Speech-in-noise result.
+  Added: M08. Status: not yet reviewed.
+
+sin.result.considerable
+  Text: In background noise you followed speech with a lot of effort.
+  Use:  Speech-in-noise result.
+  Added: M08. Status: not yet reviewed.
+
+sin.result.note
+  Text: This is a rough guide made with your headphones at your volume. It is not a measurement
+        of your hearing.
+  Use:  Speech-in-noise result.
+  Added: M08. Status: not yet reviewed.
+
+sin.result.professional
+  Text: If following speech in noise is often hard, a hearing check with an audiologist could
+        help.
+  Use:  Speech-in-noise result, considerable difficulty.
+  Added: M08. Status: not yet reviewed.
+
+sin.category.good
+  Text: Good
+  Use:  History and results.
+  Added: M08. Status: not yet reviewed.
+
+sin.category.some
+  Text: Some difficulty
+  Use:  History and results.
+  Added: M08. Status: not yet reviewed.
+
+sin.category.considerable
+  Text: Considerable difficulty
+  Use:  History and results.
+  Added: M08. Status: not yet reviewed.
+
+track.honest
+  Text: This is a guide based on your own comfortable level, not a measurement of sound
+        pressure. If you change your computer's volume, it becomes less accurate.
+  Use:  Safe listening card.
+  Added: M08. Status: not yet reviewed.
+
+track.zone.comfortable
+  Text: Comfortable
+  Use:  Safe listening card.
+  Added: M08. Status: not yet reviewed.
+
+track.zone.loud
+  Text: Loud
+  Use:  Safe listening card.
+  Added: M08. Status: not yet reviewed.
+
+track.zone.veryLoud
+  Text: Very loud
+  Use:  Safe listening card.
+  Added: M08. Status: not yet reviewed.
+
+track.alertToast
+  Text: You have listened very loudly for {n} minutes today.
+  Use:  Daily alert toast.
+  Added: M08. Status: not yet reviewed.
+
+hist.compareNote
+  Text: Differences can come from your headphones or volume, not only your hearing. If you see a
+        steady decline over time, talk to an audiologist.
+  Use:  History comparison.
+  Added: M08. Status: not yet reviewed.
+
+hist.differentHeadphones
+  Text: These two checks used different headphones ({a} and {b}), which can change the results.
+  Use:  History comparison.
+  Added: M08. Status: not yet reviewed.
+
+reminder.check.body
+  Text: Your last Hearing Check was a while ago. Checking again keeps your sound up to date.
+  Use:  Home reminder card and notification.
+  Added: M08. Status: not yet reviewed.
+
+health.track.purpose
+  Text: How long you listen at loud levels each day.
+  Use:  Listening Health.
+  Added: M08. Status: not yet reviewed.
+
+calm.required
+  Text: Sound can make background ringing easier to live with, but it is not a treatment. See a
+        doctor if ringing is in one ear only, comes with hearing loss or dizziness, or beats with
+        your heartbeat.
+  Use:  Calm Sounds page (always shown). Required by the M09 prompt.
+  Added: M09. Status: not yet reviewed.
+
+quiet.calm.does / quiet.calm.cannot / quiet.calm.more
+  Text: Plays soft, steady sounds such as rain or ocean that can make background ringing easier to
+        live with. / It is not a treatment and does not change your hearing. / Calm Sounds makes
+        its sounds on your device, so nothing downloads. You can match a sound to the pitch of
+        your background ringing and set a sleep timer. The volume never goes above a gentle limit
+        based on your Hearing Check volume setting.
+  Use:  Quiet Lab card and popover.
+  Added: M09. Status: not yet reviewed.
+
+calm.pitch.title / calm.pitch.lead / calm.pitch.step / calm.pitch.octave / calm.pitch.saved
+  Text: Match your background ringing / If you hear a background ringing, you can match its pitch.
+        Calm Sounds can then play a sound shaped around it. / A soft tone is playing. Is your
+        background ringing higher or lower than it? / One more check. Listen to both tones. Which
+        is closer to your ringing? / Your matched pitch: about {hz} Hz.
+  Use:  Calm Sounds pitch match. Uses "background ringing", never a medical term.
+  Added: M09. Status: not yet reviewed.
+
+calm.capNote / calm.capNoteNoCal
+  Text: The loudest setting stays 10 dB below your comfortable level from the Hearing Check. / The
+        loudest setting is kept low because this profile has no Hearing Check volume setting yet.
+  Use:  Calm Sounds volume slider hint.
+  Added: M09. Status: not yet reviewed.
+
+auto.honest
+  Text: Auto Boost estimates how noisy your room is. It is a helpful guide, not a calibrated
+        measurement.
+  Use:  Auto Boost controls (page and Clear Audio card).
+  Added: M09. Status: not yet reviewed.
+
+M10 (2026-11-10): first run and Home
+
+home.new.lead
+  Text: Set up sound that fits your hearing in about a minute, then use it on any video.
+  Use:  Home for a new person. Claim: "fits your hearing" (personalisation from the Hearing
+        Check or Quick start, which is estimated).
+  Added: M10. Status: not yet reviewed.
+
+welcome.body1 / welcome.body2
+  Text: Clearly makes dialogue in TV, films and videos easier to follow with your own
+        headphones. / It tunes the sound to how you hear, in about a minute.
+  Use:  First-run Welcome step.
+  Added: M10. Status: not yet reviewed.
+
+welcome.start.quickHint
+  Text: A gentle starting sound based on typical hearing for your age.
+  Use:  First run, Quick start option. Claim: an age-typical estimate, not a measurement.
+  Added: M10. Status: not yet reviewed.
+
+welcome.hear.question
+  Text: Which sounds clearer?
+  Use:  First run, Original | Enhanced demo. Invites a comparison, not a hearing claim.
+  Added: M10. Status: not yet reviewed.
+
+M11 (2026-11-10): video export. No health-related strings (export wording only).
+
+M12 (2026-11-10): desktop app
+
+NSMicrophoneUsageDescription (apps/desktop/electron-builder.config.cjs, macOS Info.plist)
+  Text: Clearly listens to the virtual cable you choose (or the room, for Auto Boost). Nothing is
+        recorded or sent anywhere.
+  Use:  macOS microphone permission prompt. PRIVACY REVIEW NEEDED.
+  Added: M12. Status: not yet reviewed.
+
+desktop.backup.body
+  Text: Clearly keeps a backup file of your profiles and settings on this computer, updated
+        after every change.
+  Use:  Settings > Desktop app. The file contains Hearing Check history (health data stored on
+        the person's computer). PRIVACY REVIEW NEEDED.
+  Added: M12. Status: not yet reviewed.
+
+cable.mic.body
+  Text: To show your devices by name, Clearly needs microphone permission. It only listens to the
+        cable you choose. Nothing is recorded or sent anywhere.
+  Use:  Virtual cable wizard. PRIVACY REVIEW NEEDED.
+  Added: M12. Status: not yet reviewed.
+
+M14 (2026-11-10): phone page
+
+everywhere.works.calm
+  Text: Calm Sounds. On some phones the sound pauses when the screen locks, so keep the screen
+        on.
+  Use:  What works on a phone. Calm Sounds is offered for comfort and sleep, not for tinnitus
+        treatment (see calm.required and quiet.calm.cannot, M09).
+  Added: M14. Status: not yet reviewed.
+
+everywhere.builtin.title / .body / .iphone / .android
+  Text: Your phone may have its own sound settings. Many phones can adjust headphone sound for all
+        apps. Look for these: iPhone: Settings, Accessibility, Audio and Visual, Headphone
+        Accommodations. Android: Settings, Accessibility, then hearing options or the Sound
+        Amplifier app.
+  Use:  Phone page. Points to other makers' accessibility features; makes no claim about them.
+  Added: M14. Status: not yet reviewed.
+
+everywhere.desktop.body
+  Text: For Windows, Mac and Linux. It can improve the sound of any app on your computer, through
+        a virtual cable (all three) or directly (Windows).
+  Use:  Get Clearly Everywhere, desktop card.
+  Added: M14. Status: not yet reviewed.
+
+CLAIMS OUTSIDE THE APP'S SCREENS
+
+PWA manifest description (apps/web/vite.config.ts)
+  Text: Clearer dialogue with your own headphones.
+  Use:  Shown by browsers when installing and in some app lists.
+  Status: not yet reviewed.
+
+app.audioPromise
+  Text: Your audio never leaves your device.
+  Use:  Home, first run, Clear Audio. A privacy claim; true for all audio (PRIVACY.txt section 1).
+  Status: not yet reviewed.
+
+Hearing Check PDF
+  Every string on the PDF comes from the pdf.* and hearingCheck.* entries above (M03).
+
+Installer and store listings
+  None exist yet. The desktop installers carry only the product name "Clearly". Any store listing
+  or download page text must be added here before it is published.
+
+HEARING CHECK WITH COMPUTER SPEAKERS (2026-11-10)
+
+pre.output.speakersNote
+  Text: Both ears hear the speakers, so Clearly checks both ears together. To check each ear on
+        its own, use headphones.
+  Use:  Pre-check, after choosing Computer speakers.
+  Status: not yet reviewed.
+
+pre.accuracySpeakers
+  Text: Results depend on your speakers, your volume and the room, so use them as a guide rather
+        than a measurement.
+  Use:  Pre-check, speakers mode (replaces pre.accuracy).
+  Status: not yet reviewed.
+
+results.speakers / pdf.speakers
+  Text: Checked through computer speakers, so both ears are shown together. To see each ear on its
+        own, check again with headphones. / Played through computer speakers: both ears together.
+  Use:  Results page and the PDF of a speakers check. Note: a speakers check cannot show a
+        difference between the ears, which pre.consent asks people to act on; reviewers should
+        consider whether that needs more prominence.
+  Status: not yet reviewed.
+
+check.measure.body (changed)
+  Text: You listen for quiet beeps in each ear. It takes about {n} seconds with headphones, or
+        less with computer speakers.
+  Status: not yet reviewed.
+
+cal.reason (changed)
+  Text: Browsers cannot know how loud your headphones or speakers are, so Clearly measures against
+        your own comfortable level.
+  Status: not yet reviewed.
+

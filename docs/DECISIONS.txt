@@ -1,0 +1,1186 @@
+CLEARLY: DECISIONS
+Project memory. One decision per entry with a one-line reason. Newest milestone at the bottom.
+
+M00 (2026-11-09)
+
+Repository and process
+- Existing history kept. The repo already had commit 3924714 (ToDo.txt) and a GitHub remote. The
+  owner chose to keep it; the six-file commit is therefore the second commit, and it deletes
+  ToDo.txt so that commit's tree holds exactly the six files.
+- Rules file name. The owner's file was RULES.MD; renamed to RULES.md as the owner chose.
+- CONFLICT, RULES.md vs M00 prompt: RULES.md says .gitignore un-ignores README.md and CLAUDE.md;
+  the M00 prompt says README.md and RULES.md. Followed the M00 prompt (*.md, !/README.md,
+  !/RULES.md) on the owner's explicit instruction, because following RULES.md literally would
+  ignore RULES.md itself. RULES.md's Markdown line should be updated by the owner to match.
+  Consequence: a CLAUDE.md file, if ever added, would be ignored.
+- Toolchain installed on the owner's Mac with permission: Node 24.22.2 (Homebrew node@24, keg-only)
+  and pnpm 10.34.9 (global npm install).
+- pnpm pinned to 10.34.9, not 12.18.0. pnpm 12 is ten weeks old with a release four days before
+  this decision; 10.x is still patched (10.34.9 on 2026-10-25) and its config is well understood.
+- TypeScript pinned to 6.0.3, not 7.0.2. typescript-eslint 8.72.2 declares typescript <6.1.0 as
+  its peer range; TypeScript 7 is the native port with a different API surface.
+- Simple-git-hooks chosen over husky: one small dependency, no extra folder.
+- Root scripts run TypeScript directly with Node 24's built-in type stripping (no tsx); scripts use
+  only erasable syntax (erasableSyntaxOnly in tsconfig.scripts.json).
+- Root "test" runs Vitest projects for scripts and apps/web only. packages/core and packages/audio
+  join when they have tests, so no project runs with zero tests and nothing pretends to test.
+- Workspace packages for server and desktop exist as scaffolds (package.json, tsconfig,
+  an empty module). Their dev/package scripts print "not built yet" and exit 0.
+- `pnpm dev` runs the web dev server and the server package's honest "not built yet" notice.
+- `pnpm test:e2e` runs Playwright against the Vite dev server, because /design exists only in
+  development. Production-mode e2e arrives with the first production route.
+- check:size budget is 250 000 bytes (decimal KB, the stricter reading) gzipped at zlib's default
+  level, summed over the entry chunk and every chunk it imports statically (the real initial
+  load), read from the Vite build manifest. Fails locally if no build exists.
+- Tracked-file guard reads blobs from the git index (what will actually be committed), rejects
+  .env and .env.* (all of them; .env.example too since 2026-11-10, owner request), .pem/.key/.p12/.pfx and SSH key names, PEM private-key
+  headers in any file up to 1 MB, and blobs over 5 MiB outside assets/demo/.
+- .gitignore also ignores /research/ (design-research screenshots, never committed) and
+  apps/web/src/design/generated/ (compiled from tokens.json at dev, build and typecheck time).
+  The "server data/ folder" rule is scoped to apps/server so a data/ folder in source code is
+  never silently ignored.
+- check:ignore runs `git check-ignore --no-index`, so it evaluates the patterns even for tracked
+  files and needs no sample file on disk. The manual check with docs/sample/test.md was also run
+  and the sample deleted.
+- GitHub Actions pinned to current majors checked on 2026-11-09: actions/checkout v7,
+  actions/setup-node v7, pnpm/action-setup v6 (reads packageManager), actions/upload-artifact v7.
+- ESLint uses typescript-eslint strictTypeChecked with an explicit tsconfig list (the project
+  service only discovers files named tsconfig.json).
+
+Design tokens
+- Token format: W3C Design Tokens Format Module 2025.10 (stable), read 2026-11-09. Colours use the
+  object form {colorSpace: "srgb", components, hex}; the loader rejects a hex that does not match
+  its components. Dimensions use px or rem, durations ms, easings cubicBezier arrays.
+- Themes are three sibling groups (color.light, color.dark, color.contrast); the spec has no theme
+  construct. Contrast pairs live in $extensions["app.clearly.contrast"] so tokens.json stays the
+  single source of truth.
+- Runtime CSS variables are named --t-<token path> (colours drop the theme segment) so they never
+  collide with Tailwind's theme namespaces (a collision produced a self-referencing variable).
+- Tailwind v4 is used without its default theme (preflight.css and utilities.css imported
+  separately, @theme inline with --*: initial), so only token utilities exist. Border widths have
+  no Tailwind namespace and are custom @utility rules reading the border tokens.
+- Theme selection: no data-theme follows prefers-color-scheme and prefers-contrast: more;
+  data-theme="light" | "dark" | "contrast" pins a theme (the in-app High contrast switch).
+- Font sizes and the measure compile to rem so they follow the browser's text-size setting.
+- Base text 19 px (default was 18): matches GOV.UK and NHS.UK; smallest size token is 18 px.
+- Warning colour #A44B06 instead of the default #B45309: the default measured 4.39:1 on the
+  sunken surface.
+- Radius split into control 8 px and surface 12 px instead of one 12 px radius everywhere.
+- One font family (Atkinson Hyperlegible Next); no display family. Rationale in DESIGN_RESEARCH.txt.
+- Colour-vision simulation uses the Machado, Oliveira and Fernandes (2009) severity-1.0 matrices,
+  copied from the authors' page. The page does not state whether they apply to linear or
+  gamma-encoded RGB; we apply them to linear RGB (the common reading of the paper). UNVERIFIED:
+  re-check against the paper's model section if exact simulation matters. The ear colours pass
+  with a large margin (smallest delta E 55 against a required 20) either way.
+- check:tokens also fails on raw hex colours, rgb()/hsl()/oklch() and literal durations in
+  apps/web/src (.tsx and .css) outside src/design/.
+- The /design page's own labels are written inline, not in src/copy/en.ts: it is a development
+  tool that never ships to users. All user-facing strings stay in en.ts.
+- Base styles wrap long words (overflow-wrap: break-word on body, anywhere on code). Without it
+  the 4xl type sample and a file name widened the page at 390 px with 200 percent text.
+
+Dependencies added in M00 (all exact versions; licence)
+- typescript 6.0.3 (Apache-2.0): type checking.
+- eslint 10.14.0, @eslint/js 10.0.1 (MIT): linting.
+- typescript-eslint 8.72.2 (MIT): TypeScript lint rules, no-explicit-any.
+- eslint-plugin-react-hooks 7.1.1 (MIT), eslint-plugin-react-refresh 0.5.7 (MIT): React rules.
+- globals 17.14.0 (MIT): browser and node globals for ESLint.
+- prettier 3.9.10 (MIT): formatting.
+- vitest 5.1.0 (MIT): unit tests, workspace projects.
+- @playwright/test 1.65.0 (Apache-2.0): e2e and the design-research measuring tool.
+- @axe-core/playwright 4.14.0 (MPL-2.0): accessibility checks in e2e (RULES.md requires axe).
+- lint-staged 17.6.0 (MIT), simple-git-hooks 2.14.0 (MIT): pre-commit formatting and guard.
+- @types/node 24.19.2 (MIT): Node types.
+- zod 4.6.7 (MIT): validation of tokens.json, the heavy manifest and build manifests.
+- vite 8.3.7 (MIT), @vitejs/plugin-react 6.3.0 (MIT): build and dev server.
+- react 18.3.1, react-dom 18.3.1 (MIT), react-router-dom 6.30.6 (MIT): as named in RULES.md.
+- tailwindcss 4.3.5, @tailwindcss/vite 4.3.5 (MIT): token-driven utilities.
+- @types/react 18.3.31, @types/react-dom 18.3.7 (MIT): types.
+- @testing-library/react 16.3.3 (MIT), jsdom 31.0.0 (MIT): component tests (named in RULES.md).
+- @fontsource-variable/atkinson-hyperlegible-next 5.3.0 (OFL-1.1): self-hosted
+  text font.
+
+M01 (2026-11-09): packages/core, threshold estimator and accuracy tests
+
+Estimator tuning (full reasoning in HEARING_MATH.txt section 5.10)
+- Tuning ladder reached STAGE 1 (maxTrials 4). Final Express constants: prior SD 13.5 dB, stopSd
+  5.5 dB, minTrials 2, maxTrials 4, jitter +/-2 dB, sharing weights 0.6 (same ear) and 0.45 (other
+  ear, raised from 0.3). Refine: stopSd 3.5 dB, maxTrials 8, as specified.
+- Chosen on tuning seed 777, rechecked on seeds 4242 and 9999, then validated once on the fixed
+  seeds 20261109 (Express) and 20261110 (Refine), so the reported numbers are not tuned to them.
+  Among passing settings we kept the specified +/-2 dB jitter (jitter 0 scored marginally higher
+  but makes the next level predictable).
+- Validation: Express 95.35% within 8 dB, mean 34.77 trials, P95 40. Refine 95.94% within 5 dB.
+- Information sharing measures each finished neighbour against its population prior mean (before
+  any sharing or seeding), not against its shifted prior. Reason: the shift should carry how far
+  this person differs from the population; a seeded Refine track's prior already is its Express
+  result, so measuring against it would share nothing.
+- Refine continues the Express catch-trial history for the guess rate and for reliability.
+- Express-seeded Refine tracks start from a Gaussian with the Express mean (stored RelLc, so a new
+  Lc carries over) and SD.
+
+Reliability target CONFLICT (not resolved; owner asked in STATUS.txt)
+- The M01 target "Low for at least 80% of high-guess listeners" cannot be met under the M01
+  section 4 rule. Measured 1.9% (Express). Neither the rule nor the target was changed. The test
+  for it is marked `it.fails` with an explanation, so the suite passes honestly and turns red if
+  the target is ever met.
+
+Interpretations
+- Catch-trial placement: random with probability owed / (expected tone trials left + 1), forced
+  when the number owed reaches the fewest tone trials that can remain. This guarantees the
+  minimum while never placing a catch first or two in a row. A track may repeat back to back only
+  when it is the last one open.
+- Edge flags are raised when at least 50% of the posterior lies past the floor or ceiling.
+- Accuracy is scored only on tracks whose truth is inside [-90 dBFS, ceiling]; censored tracks are
+  reported separately with their flag rate (Express 71%, Refine 86%).
+- Starter audiograms store reliability null (they are not measured); the schema enforces null
+  exactly when method is starter. Profiles allow calibration null for starter profiles.
+- Audiograms also store each measured band's threshold (dBFS, RelLc, SD), so a later Refine can
+  seed from a stored profile.
+- Average loss for referral flags is the mean over all eight bands.
+- Night mode has levels off, low, medium, high (the Night preset sets Medium). Its rider settings
+  belong to the audio milestone; core only resolves the level.
+- Voice focus is modelled for the clamp as a 2000 Hz peak, Q 0.7, up to +6 dB at full strength
+  (constants.ts). The audio milestone must build the same filter from those constants. Ambient
+  boost range 0 to 6 dB.
+- Movie (the defaults) has cleanup 0 and Voice focus 0, because Background cleanup needs a
+  download the person must start.
+- Uncertainty at a measured band is the track's posterior SD (the section 3 output), not combined
+  with the 1 kHz reference's SD.
+- Unmeasured bands outside the measured range (250 Hz after Express) take the nearest measured
+  value; PCHIP does not extrapolate.
+- Duration estimates use the mean simulated trial counts and a 450 ms mean tap time (an
+  assumption until real data exists). Express is "about 60 seconds" (80 at slower pace).
+- Property tests for the clamp use the seeded Rng instead of adding fast-check (no new dependency).
+- Schema fixtures are TypeScript modules (src/schemas/fixtures.ts) rather than JSON files, so core
+  needs no Node types in its source tsconfig.
+
+Scope
+- Two copy strings were added to apps/web/src/copy/en.ts (hearingCheck.results.refNote and
+  .estimatedBand), because M01 asks for the 1 kHz note "as a UI copy string for later" and RULES.md
+  requires every string to live in en.ts. Nothing else outside packages/core changed except
+  build config (root vitest project "core", ESLint project list) and docs.
+- docs/REGULATORY_REVIEW.txt created with those two strings.
+
+Biquad formulas
+- Read the W3C Web Audio API 1.1 draft (22 September 2026), section 1.13.5, on 2026-11-09:
+  peaking uses alpha_Q with linear Q; highshelf uses alpha_S with S = 1 and ignores Q. Implemented
+  in sound/biquad.ts and checked by tests (peak gain at f0, shelf half gain at f0).
+
+Dependencies
+- zod 4.6.7 (MIT) added as a runtime dependency of @clearly/core (already a root dev dependency
+  since M00; core validates stored data at runtime). No other dependency added.
+
+M02 (2026-11-09): packages/audio, graph, limiter, tone generator, offline renderer, encoders
+
+Conflicts between the M02 prompt and RULES.md or physics (RULES.md wins; each recorded here)
+- DRY-PATH DELAY. The prompt says the dry DelayNode is "exactly latencySamples (the cleanup slot
+  plus both limiter lookaheads)". Both paths pass through the Safety limiter after they are summed,
+  so the Safety limiter's lookahead delays wet and dry equally; including it in the dry delay would
+  misalign them by 96 samples and comb-filter the crossfade. Followed RULES.md ("a DelayNode that
+  exactly matches the wet path's total latency"): dry delay = wet latency (1632 samples);
+  latencySamples = wet + Safety limiter = input-to-output latency (1728). The null test and an
+  impulse in both modes confirm it.
+- COMPRESSOR LATENCY. The prompt's latency sum lists only the cleanup slot and the limiter
+  lookaheads, but Chromium's DynamicsCompressorNode delays by 288 samples (6 ms) at 48 kHz,
+  measured 2026-11-09 as a pure delay (residual -151 dB against a delayed copy, at ratio 1 and at
+  the RULES.md settings). The chain has two of them (compressor stage, program limiter). The Web
+  Audio spec does not fix this delay, so buildProcessingGraph measures it once per sample rate with
+  an impulse in an OfflineAudioContext and includes it in the budget. M06's Night-mode stage must
+  have the same latency as the normal stage (CompressorStage.latencySamples).
+- VOICE FOCUS RANGE. Core (M01) models Voice focus as up to +6 dB (VOICE_FOCUS_MAX_DB) and says the
+  audio milestone must build that filter; the M02 prompt says mid 0 to +4 dB and side 0 to -6 dB.
+  Followed the M02 prompt (the newer, more specific instruction). The clamp is told the boost the
+  graph actually applies (4 dB x amount), so core and the graph cannot disagree. Core's
+  VOICE_FOCUS_MAX_DB is now unused by the graph; the owner may want it changed to 4 (STATUS).
+- CROSSFADE AT SEGMENT JOINS. The prompt asks for a 10 ms equal-power crossfade. The two segments
+  carry the same audio in the overlap (same graph, warmed up by the pre-roll), and a true
+  equal-power fade (sin, cos) of identical signals swells by up to +3 dB mid-fade, which would
+  break the prompt's own requirement that segmented output match a single pass within -60 dB. Used
+  the amplitude-complementary raised cosine (weights sin^2 and cos^2, which sum to 1): the
+  equal-power shape on a power scale, exact for correlated audio. Measured residual: -348 dB.
+
+Graph
+- buildProcessingGraph is async: the worklet module (which holds the Safety limiter) and the
+  compressor-latency measurement are awaited before any node exists. If the module cannot load, the
+  build rejects and nothing is connected to the destination; there is no option to omit the
+  Safety limiter. Topology is recorded by a Wiring helper (Web Audio cannot list connections) and
+  tested: the only edge into the destination is from the Safety limiter in every mode.
+- Hum filter: six stages, each a BiquadFilter "notch" crossfaded (30 ms) with its own bypass gain.
+  A notch filter cannot be made flat by its parameters, so "off" is the bypass exactly
+  (x * 1 + notch(x) * 0); the null test shows a flat response.
+- Background cleanup slot: CLEANUP_LATENCY_SAMPLES = 960 (derivation in packages/audio
+  src/constants.ts): 480 for RNNoise's overlap-add synthesis (ASSUMPTION, to verify in M06 with an
+  impulse) plus a 480-sample ring-buffer prime, which works for any render quantum size (Chromium
+  158 supports a configurable render quantum: 'renderQuantumSize' in AudioContext is true).
+- Exact integer delays: AudioParam values are float32, so k / sampleRate is rounded up to the next
+  float32 so a DelayNode never interpolates between two samples. Measured delay equals the budget.
+- Simulate my hearing: cut = -min(loss, 24) dB per filter, and the cascade is held to at most 40 dB
+  of total cut (all cuts scaled together by bisection on core's biquad formulas). Biquad shelves
+  and peaks only approximate the inverse of a loss curve; documented in params.ts. Compression is
+  off in Simulate by setting the compressor stage to ratio 1, threshold 0 dBFS (the node stays, so
+  latency is unchanged; at ratio 1 Web Audio's makeup gain is 0 dB).
+- Original keeps the Enhanced plan on the silent wet path so switching is a pure crossfade.
+- Night mode: the Night-mode rider is M06. When settings request it, the normal compressor runs
+  with core's default parameters and ProcessingGraph.capabilities.nightMode is false so the UI can
+  say so plainly. Background cleanup likewise reports false until M06.
+- setBlend(0..1) added: the Original | Enhanced crossfade position (wet = x, dry = 1 - x). setMode
+  sets 0 or 1. The null test uses it at 25, 50 and 75 percent.
+- Mono: an input-monitor worklet on Tap A applies the prompt's rule (RMS of L-R below -60 dB of L+R
+  for 2 s, 100 ms windows; silence neither confirms nor breaks it). In mono the side cut goes to
+  0 dB so only the mid boost applies.
+- Overload guard: the output-monitor worklet watches the Safety limiter's output; a run continues
+  across gaps under 25 ms (a 20 Hz waveform dips below the threshold twice per cycle). On trip the
+  main thread ramps the master gain (before the Safety limiter) to 0 over 100 ms
+  (cancelAndHoldAtTime when present, else cancelScheduledValues plus setValueAtTime) and emits
+  'overload'; resumeAfterOverload() fades back and re-arms. Because the Safety limiter holds the
+  output at -3 dBFS, a real -1 dBFS overload cannot be produced through the graph, so GraphIo has a
+  test hook, overloadThresholdDbfs, which can only lower the threshold (it is clamped to at most
+  -1 dBFS). Tests: forced (threshold -6, Original mode, full-scale square) fires once offline and
+  silences a live AudioContext 0.24 s after onset; normal programme never fires.
+- Taps: analyser, loudness (BS.1770 K-weighting, momentary 400 ms, coefficients from the libebur128
+  analogue prototypes, checked against the BS.1770 48 kHz table), safe-listening tracker (the same
+  readings with their duration), compression reduction (compressor stage, program limiter, both
+  worklet limiters), captions Tap A.
+- Web Audio's DynamicsCompressorNode applies automatic makeup gain (W3C spec; measured in
+  Chromium: +8.2 dB at -24 dBFS, knee 12, 4:1 for quiet input; +1.7 dB for the program limiter at
+  -3 dBFS, 20:1). Not compensated, because RULES.md specifies only the compressor parameters. This
+  makes Enhanced louder than Original for quiet passages (owner question in STATUS).
+- Band gains are core's earGainsDb output used directly as filter gains, then clampSummedBoost per
+  ear (as the prompt requires: "never computed here"). STATUS open question 3 (fitting filter gains
+  to the target curve because Q 1.0 peaks overlap) is still open and unchanged by this milestone.
+  Voice focus is one stage shared by both ears, so it takes the stricter ear's clamp scale.
+
+Lookahead limiter (clearly-limiter worklet; DSP in src/dsp/limiterCore.ts, unit-tested in Node)
+- 4x polyphase FIR interpolation: 16 taps per branch, Kaiser-windowed sinc (beta 8), cutoff at the
+  original Nyquist, each branch normalised to unit DC gain. Detector delay 8 samples, inside the
+  lookahead. Interpolation accuracy: within 0.07 dB of the exact 4x grid up to 18 kHz.
+- Gain: required gain from the detected peak, sliding-window minimum (monotonic deque), release
+  one-pole (100 ms, instant down), then a boxcar (attack). The first version used one window
+  length for hold and boxcar; it kept every sample under the ceiling but a clipped sweep's
+  4x-oversampled peak overshot by 1 dB, because the gain ramped inside the interpolator's support.
+  Fixed by holding the gain flat across +-8 samples of every peak: hold H = L + 1 = 97 samples,
+  boxcar B = L - 15 = 81 samples (proof in the file header). Now the 4x peak holds at the ceiling
+  (-3.00 dBFS on every window of the sweep).
+- The ceiling is a k-rate AudioParam ('ceilingDbfs') the host moves with setTargetAtTime (50 ms);
+  inside the worklet a 5 ms one-pole removes the per-quantum steps. The Safety limiter is the same
+  processor with a fixed ceiling (the parameter is ignored).
+- The sample counter is rebased every 2^30 samples (about 6 hours) so bitwise ring indexing never
+  overflows in a long live session.
+- Worklet code is TypeScript compiled to one module by Vite ('?worker&url'). Checked with a
+  production build: the worklet module is self-contained (9.6 KB, no imports). Hosts that do not
+  use Vite pass GraphIo.workletModuleUrl. AudioWorkletGlobalScope has no TypeScript lib, so
+  src/worklets/scope.d.ts declares the globals used and tsconfig.worklet.json compiles against it.
+
+Tone generator
+- Each warble and the calibration ramp go through their own Safety limiter instance (RULES: the
+  Safety limiter is the last node on every path). Tones never exceed -6 dBFS, so it never acts; it
+  adds its 2 ms lookahead, which the returned onsetTime includes.
+- Calibration ramp: 32 steps of 1.5 dB from -60 to -12 dBFS, each a 5 ms linear ramp scheduled
+  ahead (no setTargetAtTime); holds -12 dBFS for one step, then fades out. levelAt(t) reports the
+  level heard at audio time t; stop() fades out and returns it.
+
+Offline renderer
+- Each segment's input runs latencySamples past its 10 ms tail. The first version stopped the input
+  at the tail and the limiters looked ahead into silence there, so joins differed from a single pass
+  (-39 dB locally at one join). Fixed; segmented output is now bit-identical to a single pass in
+  practice (-348 dB overall, -327 dB at each join), so there are no compressor-state differences to
+  document. The first segment has no pre-roll (it starts from silence exactly as a single pass).
+- A MessagePort with an onmessage handler stays reachable while entangled, and the handler closed
+  over each segment's graph, context and buffers: memory grew by about 45 MB per segment (961 MB
+  after 30 minutes). dispose() now clears and closes every worklet port. After the fix, retained
+  memory is flat.
+- The renderer drops source data as soon as it is copied into the segment's AudioBuffer, keeping
+  only the next segment's pre-roll.
+- Cancellation: AbortSignal is checked before each segment and every 10 s of render time (via
+  ctx.suspend); an aborted render rejects with AbortError and its context is dropped.
+- MEMORY TEST APPROACH: Playwright in Chromium, not Node. A Web Audio polyfill exists
+  (node-web-audio-api 2.2.0, BSD-3-Clause, actively maintained), but Chromium is the engine the app
+  ships on, and the polyfill would be a new dependency with its own AudioWorklet and compressor
+  behaviour. The test samples, every second, the page heap from CDP Runtime.getHeapUsage (usedSize
+  plus backingStorageSize, which includes ArrayBuffer stores) before and after a forced garbage
+  collection (HeapProfiler.collectGarbage), and the renderer process's RSS from `ps`. The bound
+  applies to retained memory: peak below 300 MB and no growth (median of the second half within
+  10 percent of the first). Measured on 30 minutes (15 segments): retained peak 100 to 190 MB
+  including a 52 MB page baseline; raw peak (uncollected garbage) 234 MB; renderer RSS peak 273 to
+  304 MB including Chromium itself. RSS gets only an absolute bound (500 MB), because it moves with
+  the OS and with parallel tests.
+
+Encoders
+- WAV: 16-bit PCM, TPDF dither (difference of two uniform variables, seeded xorshift32), header
+  built when the length is final and placed first in the output Blob. Encoded bytes are folded
+  into Blobs every 8 MB so the worker never holds one large ArrayBuffer. Refused up front when
+  expectedFrames would exceed the RIFF limit (0xFFFFFFFF - 36 data bytes) and during writing if it
+  is ever reached. 3 hours of 48 kHz stereo (2.07 GB) is accepted.
+- MP3 ENCODER CHOICE: mediabunny 1.62.1 with @mediabunny/mp3-encoder 1.62.1 (LAME compiled to
+  WebAssembly, run in its own worker), loaded by dynamic import inside our encoder worker only on
+  the first MP3 export. Pinned to 1.62.1 (2026-10-22), not the newest 1.65.2 (2026-11-04), so the
+  version is more than two weeks old. Evaluated 2026-11-09 on npm:
+    lamejs 1.2.1: LGPL-3.0, last release 2021, unmaintained (as the prompt says).
+    @breezystack/lamejs 1.2.7: LGPL-3.0 ESM fork with types, last release October 2023, not
+      maintained.
+    wasm-media-encoders 0.7.0: MIT wrapper around LAME (LGPL), last release May 2024.
+    @mediabunny/mp3-encoder: MPL-2.0 wrapper around LAME, released weekly (latest 2026-11-04),
+      part of an actively maintained media library that M05's file readers can also use.
+  LICENCES AND LGPL IMPLICATIONS: mediabunny and the wrapper are MPL-2.0 (file-level copyleft:
+  unmodified use is fine; keep the notice and point to the source). LAME is under the GNU Library
+  GPL v2. We use it unmodified, as a separately loaded file (the lazily loaded encoder chunk), so a
+  user can swap in another LAME build, which is what the LGPL asks of a separately linked library.
+  We must acknowledge LAME with a link and ship the licence texts: packages/audio/licenses/
+  (NOTICE.txt, MPL-2.0.txt, LAME-COPYING.txt, LAME-LICENSE.txt; the LAME texts are LAME's own
+  files, taken from @mediabunny/mp3-encoder 1.65.2, which ships them; 1.62.1 does not include the
+  folder). The app's licences screen must show them (later milestone). Mediabunny writes a Xing
+  header at the start after encoding; the worker's PatchableBlobWriter keeps the first 64 KB
+  mutable for that patch.
+- Constant bitrate 128, 192, 256 or 320 kbps (default 192). Round trip through decodeAudioData in
+  Chromium: duration +32 ms at every bitrate (encoder padding; limit 50 ms); RMS -0.47 dB at 128,
+  -0.29 dB at 192, -0.01 dB at 256 and 320 (limit 0.5 dB; 128 kbps is close to it). WAV: exact
+  duration, RMS within 0.0001 dB.
+- In the Vite dev server mediabunny must be pre-bundled (optimizeDeps.include), or Vite reloads the
+  page when it discovers it on first MP3 use. apps/web needs the same in M05.
+
+Discontinuity detector
+- Second difference against a robust scale (median absolute deviation x 1.4826, 2048-sample
+  centred window, recomputed every 256 samples), threshold 6 robust SDs, absolute floor 1e-4,
+  events merged within 5 ms. The threshold is measured, not guessed: clean renders of the
+  programme signal through every preset reach 3.7 at most. The first threshold tried, 12, missed
+  even a -20 dBFS click on processed programme.
+- Digital silence: the median is computed over non-silent samples, because a window that is mostly
+  silent (end of a fade) has a median of zero and made the fade's own curvature look infinite. In
+  real silence the absolute floor alone applies, so a lone spike there is still found.
+- Measured sensitivity on processed programme (output peak -12 dBFS): instantaneous gain steps of
+  3 dB and more, and clicks of -26 dBFS and more. Smaller steps (1 to 2 dB) are not detectable by
+  this method on dense programme. Any control applied without smoothing (preset, mode, 24 dB EQ
+  jump) steps the level by more than 3 dB. The click test also asserts that the input itself has no
+  detections and that injected faults are found (positive control).
+- The programme test signal's pink-noise bed is -44 dBFS RMS: at -28 dBFS the EQ's high-frequency
+  boost turned it into broadband noise that hid every fault from a second-difference detector.
+
+Performance probe
+- AudioWorkletGlobalScope in Chromium 158 has no `performance` object (checked 2026-11-09 by
+  listing the global scope); only Date.now (1 ms). AudioContext.renderCapacity is not present. Each
+  worklet therefore records the mean of quantised Date.now differences per process() call, which is
+  an unbiased estimate of the mean over many calls because quanta are not locked to the clock's
+  ticks; the maximum is not meaningful. performance.now is used automatically where it exists.
+  graph.getPerf() returns every worklet's report. The Playwright probe also measures offline
+  throughput (graph versus passthrough). Numbers in docs/perf.txt (rewritten on every e2e run):
+  live worklet sum 0.8 to 2.9 percent of a 2.67 ms quantum on an Apple M3 (budget 15 percent with
+  cleanup on); offline whole graph about 25 to 36 times real time.
+
+Tooling
+- Tests: Node Vitest project "audio" for the pure DSP (49 tests), Playwright project "audio" for
+  everything that needs Web Audio (57 tests, about 1.3 minutes). The harness is a Vite dev page in
+  packages/audio/harness (development only, never shipped), served on port 4174 as a second
+  Playwright webServer. Scenarios measure inside the page and return numbers.
+- Three extra tsconfigs: tsconfig.worklet.json (worklet globals only), tsconfig.worker.json
+  (WebWorker lib), tsconfig.harness.json; all in typecheck and ESLint.
+
+Dependencies added in M02
+- mediabunny 1.62.1 (MPL-2.0): MP3 output container for the encoder worker (and M05 file reading).
+- @mediabunny/mp3-encoder 1.62.1 (MPL-2.0, contains LAME under LGPL-2.0): MP3 encoding.
+- vite 8.3.7 (MIT) as a devDependency of packages/audio: compiles the worklet and worker, serves
+  the test harness (already used by apps/web).
+
+M03 (2026-11-09): Hearing Check UI (Starter, calibration, Express, results, Refine, PDF)
+
+App foundations
+- Routes use the final paths: / (temporary start page), /check, /check/starter,
+  /check/starter/done, /check/before, /check/calibrate, /check/test, /check/results/:id, /audio
+  (simple demo-clip page until M05). /quiet and /more do not exist yet: no placeholder routes.
+  Every screen is a lazy route; Dexie, core, pdf-lib and the audio engine stay out of the entry
+  chunk (75.4 KB gzipped at M03).
+- React Router v7 future flags turned on (startTransition, relativeSplatPath, fetcherPersist,
+  normalizeFormMethod, skipActionErrorRevalidation). partialHydration left off: there is no SSR,
+  and it only adds a HydrateFallback warning.
+- PlatformAdapter declares every RULES.md capability and method. WebPlatformAdapter implements
+  requestPersistentStorage (persisted() then persist()), saveFile (object-URL download),
+  openFile (hidden input), openExternal (https and mailto only). startCapture and
+  showFloatingCaptions reject with UnsupportedFeatureError until M05 and M07. tabAudioCapture is
+  getDisplayMedia present and not (coarse pointer without any fine pointer); no browser names.
+  The single place that picks an adapter is platform/detect.ts.
+- AudioEngine creates the AudioContext synchronously inside the gesture (before any await), at
+  48000 Hz with latencyHint interactive, resumes on every use, and reports state to a vanilla
+  Zustand store. It imports @clearly/audio only by dynamic import. Silent switch: if
+  navigator.audioSession exists its type is set to "playback"; only otherwise, and only with a
+  coarse primary pointer, a looping one-second silent WAV (made in code) plays on the first
+  gesture. Chromium 158 on macOS has no navigator.audioSession (checked 2026-11-09 with
+  `'audioSession' in navigator` in the Playwright browser), so the store reports "none" there.
+  Safari's behaviour must be checked on a device (MANUAL_TESTS, M10/M14).
+- Dexie database `clearly`, version 1: profiles (id), hearingChecks (id, profileId, createdAt),
+  kv (key), checkProgress (id, expiresAt). Rows are the zod documents themselves; every read goes
+  through core's migrate(), and unreadable rows are skipped with a console warning, never passed
+  on. kv values have their own zod schemas per key.
+- New versioned schemas in core: HearingCheck (record of every check, with the estimator's
+  SessionResult so Refine can seed from it) and CheckProgress (paused Refine: config, seed,
+  RNG seed and every answer). schemas/index.ts was split into base.ts and records.ts to avoid an
+  import cycle.
+- Copy: t(id, vars) fills {placeholders}. All strings are in src/copy/en.ts.
+
+Hearing Check behaviour
+- Starter saves a profile (Gentle, 12 dB cap, calibration null) and a HearingCheck record with
+  method starter and session null.
+- Calibration: the first tap after onset is "too quick" if it comes less than 400 ms after the
+  ramp's onset (CALIBRATION_TOO_FAST_MS in core). If the ramp ends with no tap (it has reached
+  -12 dBFS and held for one step), the volume message shows. Lc is stored on the active profile
+  straight away (saveCalibration) and again with the check result.
+- Responses: pointerdown on the big button or anywhere in the test area, Space or Enter anywhere
+  except inside [data-controls] (so Space still toggles the Slower pace switch), e.repeat ignored,
+  navigator.vibrate(15) where present. A tap counts only between the tone's onsetTime (which
+  includes the Safety limiter lookahead) and onset + response window, on the audio clock.
+  Catch trials use the same cue and window with no tone.
+- The runner waits on the audio clock (setTimeout re-checks at most every 20 ms). Component tests
+  give the fake engine a virtual clock (CheckAudio.waitUntil).
+- Pause (Escape or the button) aborts the current trial without answering it; Resume presents the
+  same pending trial again, so tracks continue unchanged.
+- Refine "Pause and finish later" stores the config, the RNG seed and every answer in
+  checkProgress for 24 hours; resuming replays them through core's restoreSession, which is
+  exact because the session is deterministic for a seed (unit-tested: same final result). Expired
+  progress is deleted when read.
+- Low reliability: the check is saved, and an existing profile stays active unchanged. If there
+  is no profile at all, the Low result becomes the profile so the person is never left with no
+  sound; the screen says a quieter retake will give a closer match.
+- Live audiogram during the test plots each finished threshold's distance above typical hearing
+  at this Lc (Lc - 45 + R(f)), since loss relative to the better ear's 1 kHz needs both 1 kHz
+  tracks. The results screen uses core's computeLoss.
+- Results sentence: core's describeShape (hearing/shape.ts) on the mean of both ears: typical
+  (all bands under 15 dB), a notch (4 or 6 kHz at least 15 dB above both 2 and 8 kHz), a
+  high-pitch slope (high mean minus low mean at least 15 dB and high mean at least 20 dB), a
+  low-pitch slope, flat (all at least 20 dB, spread under 15 dB), otherwise mixed.
+- Persistent storage is requested once (kv persistRequested) on the first measured results screen,
+  with one sentence explaining why.
+- The audiogram SVG uses one unit per CSS pixel of its rendered width (ResizeObserver), so axis
+  text stays at 16 px on phones and in narrow columns.
+
+PDF
+- pdf-lib 1.17.1 and @pdf-lib/fontkit 1.1.1 by dynamic import. fontkit cannot parse the variable
+  WOFF2 font ("Index out of range"), so the PDF embeds the static Atkinson Hyperlegible Next 400
+  WOFF from @fontsource/atkinson-hyperlegible-next (same family and licence, OFL-1.1), subset.
+  Saved without object streams for the widest reader support. Colours are the light theme's token
+  values (a printed page). The fontkit chunk is about 330 KB gzipped and loads only on Save PDF
+  or Share.
+- Share uses navigator.share with the PDF file where webShare is present and canShare({files})
+  is true; otherwise it downloads the PDF.
+
+Demo clip
+- The M03 demo is a self-generated speech-like sound (formant synthesis, no words), made at run
+  time by packages/audio/src/demo/syntheticSpeech.ts; CC0, recorded in assets/demo/LICENSES.txt.
+  No TTS voice is available in this environment (no espeak or Piper; the macOS `say` voices are
+  licensed for personal, non-commercial use only), so the real 60-second clip for M05 is an owner
+  question.
+
+Test hooks
+- VITE_TEST_HOOKS=1 (set only by the Playwright dev server and the web Vitest project) enables
+  window.__clearlyTest: a responder that answers trials, a time scale and a calibration level.
+  test/hooks.ts reads it only when the flag is "1"; production builds compile the flag to false.
+
+Dependencies added in M03 (exact versions; licence; reason)
+- zustand 5.0.16 (MIT): UI state, named in RULES.md.
+- dexie 4.4.7 (Apache-2.0): IndexedDB, named in RULES.md.
+- pdf-lib 1.17.1 (MIT): results PDF, named in RULES.md.
+- @pdf-lib/fontkit 1.1.1 (MIT): embedding the self-hosted font in the PDF (pdf-lib needs it for
+  any non-standard font).
+- @fontsource/atkinson-hyperlegible-next 5.3.0 (OFL-1.1): static WOFF of the app font for the PDF.
+- @radix-ui/react-checkbox 1.4.1, @radix-ui/react-switch 1.4.1, @radix-ui/react-dialog 1.3.1
+  (MIT): accessible primitives, named in RULES.md (dialog is used from M04).
+- fake-indexeddb 6.2.6 (Apache-2.0, dev): IndexedDB in Vitest.
+- @testing-library/user-event 14.6.8 (MIT, dev): realistic keyboard and pointer input in tests.
+
+OWNER INSTRUCTION (2026-11-09, during M04): do not commit or push anything; build on the local
+machine only. This overrides the "commit at the end of every milestone" step in RULES.md and the
+M03-M14 prompt. A second instruction the same day: remove every commit after 3924714 ("Add
+initial content to ToDo.txt") from history but keep all files. Done with `git reset --mixed
+3924714`: local main now ends at 3924714 and all work (M00 to M03 and M04 so far) is uncommitted
+in the working tree. ToDo.txt shows as deleted because an M00 commit removed it from disk; it was
+not restored or touched. On the owner's instruction, origin main was then force-pushed back to 3924714
+(2026-11-09). Nothing is committed or pushed from here on.
+
+M04 (2026-11-09): storage, profiles, Settings, backup files, server, restore codes and sync
+
+Local storage
+- Dexie version 2 adds sinChecks (id, createdAt), exposureDays (id = local date), captionCache
+  (id = file hash, createdAt). Version 1 tables are unchanged. A test opens a version-1 database
+  exactly as M03 wrote it and checks the upgrade.
+- New versioned schemas in core (schemas/later.ts, schemas/backup.ts): SinCheck, ExposureDay,
+  CaptionCache and Backup, each with a v1 fixture in the migration harness. Backup migrates every
+  nested record. MAX_PROFILES = 5 lives in core.
+- File hash: SHA-256 over the first 1 MiB, the last 1 MiB and the decimal file size
+  (storage/fileHash.ts). Two files of the same size that differ only between their first and last
+  megabyte would share captions; accepted for a caption cache.
+- App settings live in kv under "settings" as core's versioned Settings document; other kv keys
+  have their own zod schemas.
+- Backup reminder: due 30 days after the last backup (or after the oldest Hearing Check when there
+  has never been one), snoozed for 30 days by "Not now", off by a Settings switch. The storage tip
+  shows once when navigator.storage.persisted() is false and the app is not standalone
+  (display-mode: standalone or navigator.standalone), and when a profile exists.
+
+Profiles
+- Demo profiles are built in memory (store/demoProfiles.ts, ids "demo-..."), never written to
+  IndexedDB, so they can never be backed up or synced. Their names come from the copy file.
+- "I got new headphones" copies a profile with calibration cleared and makes it active; the next
+  Hearing Check asks for a level. Changing a profile's headphone name also clears its calibration,
+  because Lc belongs to the old headphones (the dialog says so).
+- Deleting a profile keeps its Hearing Check history (the checks keep their profileId).
+- Sound defaults: Strength is written to settingsOverrides.strength as well as profile.strength,
+  because core's precedence function reads the remembered manual change.
+- Output-device auto-select: enumerateDevices() labels are read only if the browser already shows
+  them; nothing asks for a permission. The label of the "default" (else first) audio output maps
+  to the profile last chosen with it (kv deviceProfiles). In Chromium without a granted microphone
+  permission the labels are empty, so auto-select does nothing there (verified only in that
+  sense; no device with labels was available here).
+
+Server
+- Stack: Fastify 5.12.7, fastify-type-provider-zod 7.0.0 (chosen: it is the type provider the
+  Fastify docs list for zod and supports zod 4), better-sqlite3 13.0.3 (WAL, foreign keys,
+  PRAGMA user_version migrations kept as SQL strings in db.ts), @fastify/helmet 13.2.0,
+  @fastify/cors 11.3.1, @fastify/rate-limit 11.2.1, @fastify/static 10.1.7, pino (Fastify's own).
+- 401 versus 404: a malformed or missing Bearer token is 401 before any lookup; an unknown profile
+  is 404; a valid-looking token for an existing profile that does not match is 401.
+- /api/health also returns retentionDays, so the client shows the server's real retention period.
+- Payload limit: the JSON text of the payload over 256 KiB is 413; bodyLimit is 272 KiB so the
+  check runs in the handler with a clear error.
+- Rate limits are per client address (req.ip, which honours TRUST_PROXY); fastify's types do not
+  include the hop-count form of trustProxy that proxy-addr accepts, so it is passed through a cast.
+- The cooldown and the global alarm are in memory and reset on restart, as specified. The alarm
+  threshold is RESTORE_ALARM_PER_HOUR (default 200 failed redemptions per hour across all
+  clients) and logs once per hour window.
+- Logging: custom req/res serializers (method, route pattern, status) plus redact paths; a test
+  sends a token, an address and a user agent and checks none appears in the log stream.
+- Server build: Vite SSR build bundles src/main.ts and @clearly/core into dist/server.js with npm
+  dependencies external. Development runs src/main.ts directly with Node 24 type stripping.
+- Docker: multi-stage node:24-bookworm-slim, pnpm deploy --prod for the server's dependencies
+  (better-sqlite3 compiled in the build stage), runs as the non-root "node" user, /data volume,
+  HEALTHCHECK on /api/health. NOT VERIFIED: Docker is not installed on this machine, so the image
+  has not been built or run. The built server (dist/server.js) was run directly and served the
+  API, the SPA fallback (no-cache) and hashed assets (immutable).
+- Static serving: /assets/* and /heavy/* get "public, max-age=31536000, immutable"; everything
+  else, including the SPA fallback index.html, gets "no-cache".
+- CSP: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:;
+  connect-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline' (React style attributes,
+  for example progress widths); img/media-src self, data:, blob:; object-src 'none';
+  frame-ancestors 'none'. NOT YET CHECKED against the production web build in a browser (M10/M14
+  CSP pass).
+
+Client sync
+- The payload is the Backup document (the same as the backup file). Listening history and the
+  caption cache are included only with "Include listening history".
+- Debounce 5 s (test builds can shorten it). A "dirty" flag in the stored sync state marks local
+  changes the server has not accepted; it survives reloads, so an offline change is sent on the
+  next start. Syncing without changes never happens (an earlier version re-sent on every load and
+  created needless versions and false conflicts).
+- 409: the dialog shows this device's backup time and the server copy's updatedAt. "Keep this
+  device's version" rebases on the server version and writes; "Use the newer one" applies the
+  server copy locally without syncing it back.
+- A proxy answering 502/503/504 (the Vite dev proxy with the server down) counts as offline.
+- Restore from code shows a preview from the redeemed payload before anything changes. Redeeming
+  already consumes the code on the server (one use), so cancelling at the preview means making a
+  new code; the alternative (preview without redeeming) would need a second endpoint the prompt
+  does not list.
+- Feedback has no fallback queue: offline, it shows the exact text and offers "Send by email"
+  (mailto with no recipient; the owner has not given a support address; owner question).
+
+Dependencies added in M04 (exact versions; licence; reason)
+- fastify 5.12.7 (MIT), fastify-type-provider-zod 7.0.0 (MIT), @fastify/helmet 13.2.0 (MIT),
+  @fastify/cors 11.3.1 (MIT), @fastify/rate-limit 11.2.1 (MIT), @fastify/static 10.1.7 (MIT),
+  better-sqlite3 13.0.3 (MIT): the server stack named in the M04 prompt.
+- @types/better-sqlite3 7.6.13 (MIT, dev): types.
+- fflate 0.8.3 (MIT): share-link compression, named in RULES.md.
+- zod 4.6.7 and @clearly/core in apps/server (already used elsewhere).
+
+M05 (2026-11-09): Clear Audio on the web
+
+Sources
+- /audio lists adapter.listAudioSources(): demo and file always, tab when tabAudioCapture. The
+  file card leads (wider, dashed drop area); demo and tab share the third column, so the screen is
+  not three identical cards. Without tab capture: a card explaining the alternatives (desktop), or
+  on coarse-only pointers the "Why can't I use Netflix or YouTube here?" card.
+- The AudioContext is started in the source card's click handler (the gesture), before the player
+  route loads.
+- getDisplayMedia options: video true; audio {suppressLocalAudioPlayback: true, echoCancellation,
+  noiseSuppression, autoGainControl all false}; selfBrowserSurface 'exclude'; surfaceSwitching
+  'include' (switch tabs from Chrome's sharing bar); systemAudio 'exclude' (tab audio only);
+  preferCurrentTab false. These option names are from the Screen Capture spec and Chromium's
+  "Capture Handle"/"Privacy-preserving screen sharing" documentation as known at writing; they
+  were NOT re-read online in this session. Verified in Chromium 158: getSupportedConstraints()
+  reports suppressLocalAudioPlayback true. Unknown dictionary members are ignored by browsers.
+- The video track is stopped and removed at once; the tab title comes from its label before it
+  stops. track.getSettings().suppressLocalAudioPlayback !== true shows the doubled-sound warning;
+  the "Yes, it works / No" answer is remembered (kv tabMuteWorks).
+- NotAllowedError and AbortError from the picker are treated as a quiet cancel.
+- Page-hidden throttling: NOT MEASURED here (needs a person and real tabs; MANUAL_TESTS M05 1c).
+  The AudioContext is never suspended by Clearly when the page is hidden.
+
+Player
+- Files and the demo play through an <audio> or <video> element and createMediaElementSource;
+  the graph is attached on the first play (inside the play click). Tab capture uses
+  createMediaStreamSource.
+- Space toggles Original | Enhanced when focus is not in an input, textarea or select, and not on
+  a button, link, switch, checkbox or summary (so Space still presses buttons for keyboard
+  users). Holding H plays Original until release. K, J, L control the transport.
+- Presets are chips (Movie, Speech and news, Music); Night joins in M06. The preset is stored in
+  the app Settings document; Strength, Voice focus and per-band adjustments are remembered per
+  profile in settingsOverrides. In the Music preset, turning Voice focus on is a session override
+  (core precedence).
+- Voice focus default 30 percent with a profile: manualFor() puts voiceFocus 0.3 under the
+  profile's remembered overrides.
+- Per-band adjustments (Advanced, -12 to +12 dB per ear and band) are settingsOverrides.bandAdjustDb,
+  an optional field: version-1 profiles stay valid, so no migration was added. Core's precedence
+  passes them through as ResolvedSettings.bandAdjustDb, and planFilters adds them to the personal
+  EQ before the +24 dB summed-boost clamp.
+- The EQ chart is computed from graph.plan with core's biquad formulas (the clamp's maths), with
+  the analyser spectrum and the Auto Boost (ambient) peak as overlays, plus a data table.
+- Waveform: a live, decorative level display from the analyser (aria-hidden); meters carry the
+  information as a table.
+- Media Session: metadata and play, pause, seekbackward, seekforward handlers.
+- Unsupported codecs: the media element's error event names the file extension and suggests
+  converting or the desktop app.
+- The M03 demo page (src/demo/DemoPage.tsx) is no longer routed; /audio replaced it. The file was
+  left in place because the owner asked that no files be deleted (STATUS question).
+
+Demo clip
+- STILL SYNTHETIC: a 60-second speech-like clip generated by syntheticSpeech (CC0), rendered to a
+  WAV object URL in the browser. The M05 prompt's TTS clip is blocked on the owner (question 10).
+  It is honestly described as a "clip with two voices" made by Clearly; the copy will change when
+  real speech arrives.
+
+Export
+- ChunkedSourceReader for files: packages/audio render/fileReader.ts with mediabunny 1.62.1
+  (MPL-2.0, already a dependency since M02) for demuxing (MP4/MOV, WebM/MKV, Ogg, MP3, WAV, FLAC,
+  ADTS) and WebCodecs decoding, plus a new StreamResampler (Kaiser-windowed sinc, 24 taps a side,
+  1024-phase table) to reach 48 kHz. Measured: 44.1 to 48 kHz error -60 dB on a 1 kHz sine,
+  chunk-size invariant, 40 kHz alias below -60 dB when going 96 to 48 kHz. Multichannel input is
+  downmixed (front L/R plus centre at -3 dB).
+- Chunked decoding by codec in Chromium 158 (AudioDecoder.isConfigSupported, 2026-11-09): AAC,
+  Opus, MP3, Vorbis, FLAC, PCM yes; ALAC, AC-3 no (those fall back). Firefox and Safari: NOT
+  TESTED (no Playwright Firefox/WebKit installed; M14).
+- Fallback: decodeAudioData in an OfflineAudioContext at 48 kHz, only when the decoded audio fits
+  150 MB of float samples; files larger than the budget are refused before reading (decoded audio
+  is never smaller than the file).
+- Limits: 3 hours on desktop; 30 minutes when the pointer is coarse with no fine pointer, or
+  navigator.deviceMemory is 2 GB or less.
+- Saving: where showSaveFilePicker exists, the finished Blob is written to the chosen file
+  through a FileSystemWritableFileStream. The encoder worker already builds the result as 8 MB
+  Blob parts, which Chromium keeps on disk for large Blobs, so the JavaScript heap never holds the
+  whole file; this is not a byte-by-byte stream from the encoder to the file (an honest
+  limitation). Without the picker, a download is offered only when the estimated size is under
+  1 GB.
+- Estimate: a 10-second benchmark render of the start of the file (discarding output), scaled to
+  the full length, times 1.3 for encoding and segment joins.
+- Tests: Playwright exports a generated 20 s, 44.1 kHz WAV to WAV and MP3 and compares duration
+  (within 50 ms) and RMS (within 0.5 dB) against an in-page reference render made with the same
+  settings. Both pass.
+- The audio Playwright file runs serially: real-time playback in parallel with offline renders in
+  other workers starved the main thread and timed out axe.
+
+M06 (2026-11-09): Night mode and Background cleanup
+
+Night mode
+- Rider (dsp/rider.ts, worklet clearly-rider): BS.1770 K-weighting with the 48 kHz table
+  constants (Table 1 pre-filter, Table 2 RLB; analogue-prototype formulas at other rates),
+  short-term loudness over 3 s from 100 ms blocks (L and R mean squares summed, -0.691 offset),
+  target gain clamped to +boost/-cut, slewed per sample at most +3 dB/s and -6 dB/s; when the
+  3 s loudness is below -60 LUFS the target freezes at the current gain (the gate). Zero latency.
+- Levels map to core's NIGHT_MODE_LEVELS (low = Light, medium = Medium, high = Strong).
+  Compressors after the rider (constants.ts NIGHT_LEVELS), each threshold 6 dB under the level's
+  target so it catches only peaks the slow rider lets through:
+    Light  -30 dBFS, knee 10 dB, ratio 3, attack 10 ms, release 250 ms (natural, gentle).
+    Medium -32 dBFS, knee 8 dB, ratio 5, attack 6 ms, release 200 ms.
+    Strong -34 dBFS, knee 6 dB, ratio 8, attack 3 ms, release 150 ms (holds loud scenes firmly).
+- The compressor slot runs the normal stage and the Night stage in parallel and crossfades them
+  (30 ms time constant). Both are DynamicsCompressorNodes and the rider adds no delay, so the
+  latency budget and the dry delay are unchanged (all M02 latency and null tests still pass).
+  Cost: the Night branch always runs (rider about 1 to 19 us per quantum).
+- Measured (Playwright, 48 s programme alternating 8 s passages 30 dB apart, last 4 s of each):
+  loudness range shrinks by at least 6 / 9 / 12 dB at Light / Medium / Strong, strictly more per
+  level; peaks stay at or under -3 dBFS sample and -2.5 dBFS 4x-oversampled; no clicks while
+  switching levels and off (discontinuity detector on both channels). An earlier version of the
+  click test passed one channel where the detector expects a list of channels and so checked
+  nothing; fixed before recording the result.
+- Choosing a preset clears a remembered Night on/off choice, so the Night chip always turns Night
+  on and other presets follow their own Night setting. (Without this, a remembered "off" beat the
+  Night preset under core's precedence and the chip did nothing.)
+- Schedule "Turn on automatically" with a time (default 21:00): checked every 20 s while Clearly
+  is open, once per day, turns Night on at Medium; the card says it works only while open.
+
+Background cleanup
+- Build: @sapphi-red/web-noise-suppressor 0.4.1 (MIT) ships Shiguredo's RNNoise build 2022.2.0
+  (Apache-2.0; RNNoise BSD-3-Clause) as two plain WebAssembly files, rnnoise.wasm (152,656 bytes)
+  and rnnoise_simd.wasm (157,234 bytes). Chosen over @shiguredo/rnnoise-wasm (WebAssembly
+  embedded as base64 in a 4.8 MB script, so it cannot be served as a /heavy/ file) and
+  @jitsi/rnnoise-wasm (no licence field; no SIMD build). Only the .wasm files are used, not the
+  package's JavaScript; they are fetched at build time from the jsDelivr copy of the npm package
+  (bytes checked equal to the npm tarball) and verified by SHA-256 and size.
+- The modules need only three imports (emscripten_memcpy_big, emscripten_resize_heap,
+  __assert_fail) and export malloc, free, rnnoise_create, rnnoise_process_frame (returns the
+  voice-activity probability), so CleanupCore instantiates the compiled module directly in the
+  worklet with tiny shims: no Emscripten loader, and the worklet never fetches.
+- SIMD: WebAssembly.validate on a one-instruction SIMD module picks rnnoise_simd.wasm, else
+  rnnoise.wasm. The app compiles it on the main thread and passes the WebAssembly.Module to the
+  worklet in processorOptions (structured clone), so offline export graphs have cleanup from the
+  first sample.
+- Latency: RNNoise's own delay measured by cross-correlation in Node: 480 samples, confirming the
+  M02 assumption. Frames of 480 are collected in a ring buffer and the wet stream is pre-filled so
+  the total is exactly CLEANUP_LATENCY_SAMPLES (960); the constant did not change. At strength 0,
+  or before the module arrives, the worklet outputs the dry signal through a 960-sample delay.
+  In-graph tests: the impulse lands at the same place as without cleanup, and the graph with
+  cleanup at 0 percent nulls against the graph without it (max error under 1e-5).
+- Noise reduction (speech-like clip plus pink noise, gaps measured): at least 10 dB, both in Node
+  on the core and through the whole graph in Chromium.
+- Live graphs keep the DelayNode until the module is ready, then crossfade to the worklet (same
+  latency, 30 ms). Strength is a k-rate AudioParam smoothed inside the worklet (30 ms one-pole).
+- Sample rate: when the AudioContext is not at 48 kHz, cleanup is off with a plain message
+  (CleanupCard). A resampler inside the worklet was not chosen: it would add latency that differs
+  by rate and break the constant-latency design. The app requests 48 kHz, so this is rare.
+- Voice activity: the mean RNNoise probability per report (at most every 100 ms), smoothed
+  (one-pole 0.5), shown as "Voice detected" above 0.5.
+- First use: the card shows the real size from heavy-manifest.json, downloads only on a tap,
+  asks first on a cellular or data-saver connection (navigator.connection type or saveData),
+  shows a progress bar, verifies the SHA-256, and stores the file in the Cache API
+  (clearly-heavy-v1). A failure shows the error panel with Try again; the player keeps working.
+  The first switch-on sets 60 percent.
+- Music preset: cleanup forced to 0 by core unless turned on again in the session (session
+  override), the same as Voice focus.
+- Hint chip "Try Background cleanup": shown once when the latest speech-in-noise result is not
+  "good", cleanup is off, and it was not dismissed (cleanupHint.ts, tested with the SinCheck
+  fixture). M08 produces the results.
+- Export includes cleanup when it is on and the module is cached.
+
+Performance (Chromium 158, Apple M3; docs/perf.txt)
+- Cleanup 100 percent + Night Strong + Voice focus 100 percent: worklet sum 2.7 to 11.1 percent of
+  a quantum across runs (the Date.now-based probe and machine load move it); 8.5 percent on two
+  consecutive runs after removing per-frame typed-array allocations in CleanupCore. Budget 15.
+- Test-only TypeScript: Node-only tests that read files are named *.node.test.ts and checked by
+  packages/audio/tsconfig.nodetest.json (node types), keeping node types out of library code.
+- CI now runs pnpm fetch:heavy before typecheck and before the e2e job.
+
+M07 (2026-11-09): Captions
+
+Models and delivery
+- @huggingface/transformers 4.3.1 (Apache-2.0), loaded only inside the caption worker. It depends
+  on onnxruntime-web 1.31.0-dev.20260914-8d85527a0 (MIT; a dev build pinned by transformers
+  4.3.1, owner question 15), and lists onnxruntime-node and sharp, which are never bundled for
+  the browser (their native build scripts are not run by pnpm here).
+- Models: onnx-community/whisper-tiny.en_timestamped (Standard) and
+  onnx-community/whisper-base.en_timestamped (More accurate), pinned to revisions aeaa137 and
+  fa239a4. The "_timestamped" exports include cross-attention outputs, which transformers.js
+  needs for word timestamps; the plain exports only give segment times. Quantisation: dtype q8
+  (encoder_model_quantized + decoder_model_merged_quantized). Whisper weights MIT (OpenAI).
+- Sizes users see (from heavy-manifest.json, including the 26.9 MB ONNX Runtime asyncify
+  WebAssembly and its 53 KB loader): Standard about 66.8 MB, More accurate about 99.4 MB.
+- ONNX Runtime WebAssembly: ort-wasm-simd-threaded.asyncify.{mjs,wasm} from onnxruntime-web at
+  the pinned version (the variant transformers 4.3.1 selects by default; it supports WebGPU and
+  WebAssembly). Served from /heavy/ort/.
+- No third-party requests: transformers sets ONNX Runtime's wasmPaths to jsDelivr when it loads,
+  so the worker overrides env.backends.onnx.wasm.wasmPaths before any session; allowRemoteModels
+  false; localModelPath /heavy/models/; the browser cache is replaced by env.customCache backed by
+  Clearly's own verified heavy cache (keys mapped from Hugging Face URLs to /heavy/ paths), so
+  files are downloaded once, by Clearly's flow (size, tap, metered confirmation, progress,
+  SHA-256), and work offline. A Playwright test records every request during a full caption run
+  and allows only this origin plus blob: and data: (ONNX Runtime makes a same-origin blob URL for
+  its loader).
+- Device: WebGPU only when navigator.gpu gives an adapter AND a test run of the loaded model on a
+  second of near-silence succeeds; otherwise WebAssembly, with threads only when
+  crossOriginIsolated (Clearly is not cross-origin isolated, so one thread). Recorded: headless
+  Chromium 158 on an Apple M3 has no WebGPU adapter and uses WebAssembly, one thread; Standard
+  transcribes the 11 s test recording in about 2 to 5 s. Firefox, Safari and GPU Chrome: not
+  measured here (MANUAL_TESTS M07 5; M14).
+- Model dropdown with Standard and More accurate; "English only for now" in the UI. The list is
+  data (CAPTION_MODELS), so a multilingual model is one entry plus manifest lines.
+
+Transcription
+- Windows of 8 s with 1 s overlap (7 s hop) at 16 kHz mono; an energy gate (30 ms frames, -45
+  dBFS, at least 5 percent active) skips silent windows.
+- Merge by word timestamps: words before the middle of the overlap come from the earlier window,
+  later ones from the newer window (each window hears its middle best); a word repeated across
+  that point is kept once. Tested with a fixture shaped like real overlapping output.
+- Cues: at most 2 lines of 42 characters and 7 s, broken at pauses over 1 s and at sentence ends.
+  SRT (comma milliseconds, numbered) and WebVTT (header, dot milliseconds, "-->" escaped in text)
+  checked by a strict parser in unit tests and from real downloads in Playwright.
+- Files are read ahead with packages/audio openFileReader at 16 kHz (the same chunked reader as
+  export). Where a file cannot be read ahead, captions fall back to live transcription from the
+  playing media element through the capture worklet, and the card says so.
+- Captions first (on by default): playback pauses until captions are 10 s ahead of the playhead
+  and resumes by itself; it ends when captions are complete.
+- Cache: results are stored in captionCache by file hash (M04) with the model name; a complete
+  entry for the same model is reused instantly (tested by reopening the file). Partial progress
+  is saved every 8 windows; an incomplete entry is re-transcribed from the start.
+- Live: the clearly-capture worklet on Tap A downmixes to mono and resamples to 16 kHz (the M05
+  StreamResampler, 12 taps a side), posting 0.5 s chunks. If the oldest waiting window is more
+  than 15 s behind the newest audio, the backlog is dropped to the newest window with "Captions
+  skipped ahead to keep up". Each live caption stays at least 6 s (nextLiveCue, tested).
+- The capture worklet's resampler allocates small arrays per quantum; it runs only while live
+  captions are on and is not on the playback path.
+- Display: Off, On for this video, Always on (kv). Caption panel in the player (role region,
+  aria-live polite). Document Picture-in-Picture where capabilities.floatingCaptions and
+  documentPictureInPicture exist: opened on the button (a gesture), stylesheets copied in,
+  Escape closes it, rendered through a React portal. Without it the panel is the fallback
+  (tested). Desktop (M12) will use adapter.showFloatingCaptions.
+- Caption settings: size 18 to 64 px, 1 to 3 lines, white on black, yellow (#FFE14D) on black,
+  black on white; added as colour tokens with contrast pairs (16.1:1 to 21:1, check:tokens).
+- Test fixture: jfk.wav (Kennedy's 1961 inaugural address, a US government work in the public
+  domain) from the transformers.js docs dataset, fetched by fetch:heavy into
+  public/heavy/test-fixtures/ and deleted from production builds by a Vite plugin. It is used
+  because the demo clip is synthetic (owner question 10), so it has no words to recognise.
+- Settings has a Downloads section: "Remove downloaded captions files" and the same for
+  Background cleanup.
+- The Dockerfile now runs pnpm fetch:heavy before building.
+
+M08 (2026-11-09): Listening Health
+
+- DIGIT RECORDINGS: BLOCKED (owner question 10). No permissively licensed TTS voice is available
+  here. The check is fully built; it loads /digits/0.wav to 9.wav (an owner-supplied pack placed
+  in apps/web/public/digits/) and, where they are missing, the screen says plainly that the check
+  is not available yet. Responses that are not audio count as missing, because the single-page
+  fallback answers unknown paths with HTML. Tests use generated stand-in digits.
+- Core biquad maths gained lowshelf and lowpass (Web Audio formulas; lowpass Q in dB). Before
+  this, those types silently used the high-shelf formula; the first LTASS fit was made with that
+  bug and was discarded. Unit tests now pin both types.
+- LTASS target and fit: HEARING_MATH 8.1 (0.72 dB largest error).
+- Digit preparation (packages/audio dsp/digits.ts): onset = first sample above -40 dBFS less
+  10 ms; end trimmed the same way; scaled to -20 dBFS RMS. Test: four digits at levels 25 dB
+  apart all land within 0.5 dB.
+- createSafetyLimiter (packages/audio) gives sound outside buildProcessingGraph its Safety
+  limiter; the speech-in-noise mix ends in one.
+- Without a calibration the check links to /check/calibrate?next=/more/health/speech, and returns
+  there. ?next accepts only paths on this origin (starting with one "/").
+- BUG FIXED (from M03): the calibration screen did not load the profile store, so arriving there
+  directly never stored Lc on the profile. It now loads the store and saves after it is ready.
+- Results: Some difficulty offers "Apply suggested settings" (Voice focus 50 percent, Background
+  cleanup 40 percent as the profile's remembered settings); Considerable adds the Speech and
+  news preset, the Captions suggestion and the see-a-professional sentence. Results go to
+  sinChecks, which also turns on the M06 hint chip.
+- Tracker: the output monitor now reports an unweighted stereo power mean per interval
+  (rmsDbfs) alongside LUFS; the tracker pools readings into one-second means and flushes minutes
+  every 5 s. It is off without a calibration (it also uses a level set this session). The daily
+  alert is a toast with "Lower the loudest sound limit by 6 dB" (to at least -24 dBFS), at most
+  once per day (exposureDays.alerted). Toasts have no timeout. Pause and Clear history in the card.
+- Test builds can speed the tracker (trackerTimeScale) so minutes add up in a short test.
+- History compares two Hearing Checks on one chart (the earlier in grey) with a table, the honest
+  sentence and a different-headphones note. Speech-in-noise results are listed too.
+- Reminder: every 3, 6 (default) or 12 months, or never; at most once per 7 days; a Home card;
+  a local notification only while Clearly is open, only if turned on (permission asked then).
+- Calm Sounds counting arrives with Calm Sounds (M09) through tracker.record.
+
+2026-11-09  M09 QUIET LAB
+- No active noise cancellation was built (the M09 prompt removes the Hum Canceller).
+- Hum Filter detection (packages/audio dsp/humDetect.ts, pure): Tap A AnalyserNode, 8192 FFT,
+  Blackman, smoothing 0, every 500 ms; spectra averaged over 3 s in linear power (speech moves,
+  hum does not); parabolic interpolation; 12 dB above the local median; lock after 3 s steady
+  within 0.5 Hz; follow the median of recent frames (30 percent per update); 2 s hold after any
+  change; frames where programme hides the hum do not reset the history (released only after 6 s
+  with no hum at all).
+- Hum notches: a single Q-30 notch removes 25 dB only within about +-0.04 Hz of the hum, which an
+  8192-point FFT cannot pin under speech. Each frequency gets two stagger-tuned Q-30 notches
+  (+-0.12 percent), so HUM_MAX_NOTCHES is 12 (six frequencies). Once locked, the fundamental and
+  all five harmonics are notched. Measured: hum at 49.5, 50.5, 59.5 and 60.5 Hz detected within
+  0.2 Hz, at least 25 dB lower, speech band (300-3400 Hz) changed under 1 dB; mode switches click-
+  free. The prompt's "frequency drift of +-0.5 Hz" is tested as hum offset by +-0.5 Hz from 50 and
+  60; a hum that keeps sliding is followed slowly by the tracker (not render-tested).
+- The optional before/after spectrum in "See what Clearly is doing" was not built (the prompt
+  marks it optional); the readout says what is removed.
+- Hum Filter mode is remembered on this device (kv humMode) and kept in the player store so a
+  source change does not lose it. "Hear the demo with hum" remounts the player with a fresh media
+  element (createMediaElementSource works once per element), and turns Auto on if it was Off.
+- Auto Boost (packages/core listening/autoBoost.ts, pure): one-pole smoothing in dB (2 s attack,
+  5 s release); 3 dB of hysteresis as a backlash (the mapped level moves only once the smoothed
+  level is more than 1.5 dB away); -55..-30 dBFS maps to 0..+6 dB ambient and 0..6 dB lower
+  compressor threshold; Sensitivity High/Low shifts both thresholds by -5/+5 dB. Precedence gains
+  thresholdDropDb (clamped 0..6, normal compressor only; Night mode keeps its stage). The ambient
+  dB still goes through the summed-boost clamp, so a profile whose EQ already reaches +24 dB near
+  2.5 kHz gets less (or none) of it; the readout shows what Auto Boost asks for.
+- Feedback guard: Pearson correlation of the output and microphone RMS envelopes (dB, 4 readings
+  a second, both over the same 250 ms window) over the last 10 s; above 0.6 for 5 s freezes the
+  boost until "resume". Envelopes moving less than 0.5 dB count as no correlation.
+- Auto Boost runs on the app's AudioContext; the microphone goes only into an AnalyserNode (never
+  to the output, never recorded). getUserMedia: 1 channel, echoCancellation, noiseSuppression and
+  autoGainControl false. The controls are a shared component used on /quiet/auto-boost and in a
+  Clear Audio card, so it can be set up without stopping playback. The headphones answer lasts
+  for the session (memory only).
+- Calm Sounds generators (packages/audio dsp/calm.ts, worklet clearly-calm): white (xorshift32),
+  pink (Paul Kellet refined), brown (leaky integrator, 20 Hz corner, then a 5 Hz DC blocker; a
+  4 Hz corner made 2 s RMS wander by 1 dB), rain (pink band-limited 500-8000 Hz with 4th-order
+  Butterworth edges plus decaying noise droplets, about 25 per second), ocean (brown times a
+  0.1 Hz sine swell plus a slow bounded drift), tailored (white noise through two cascaded
+  one-octave notches, Q 1.41, at the matched pitch), tone (sine, for pitch matching). Each is
+  normalised to -20 dBFS long-term RMS by measuring a fresh copy on the main thread (sent to the
+  worklet so the audio thread never spends milliseconds measuring). Left and right are
+  decorrelated.
+- Volume cap: calmGain(volume, cap) never exceeds the cap (Lc - 10 dB RMS, or -24 dBFS without a
+  calibration) for any input including NaN and Infinity; the cap is fixed when the Calm graph is
+  built. The Calm graph ends in a Safety limiter. Tested offline for every generator with a
+  malicious volume.
+- Sleep fade: an exponential ramp of the fade gain from the current value to -80 dB over 60 s,
+  then 0 (an exponential ramp is linear in dB, which sounds even). This is a scheduled automation
+  rather than setTargetAtTime, recorded here as a deliberate exception for a 60 s fade. Click-free
+  in the offline test (shortened to 3 s), tail below -90 dBFS.
+- Pitch match: 6 kHz start, third-octave steps between 250 Hz and 12.5 kHz, octave check with half
+  and double; saved as profile.ringingPitchHz (already in the schema). Tone volume is held at most
+  35 percent of the slider range under the cap.
+- Calm Sounds counts toward the safe-listening tracker through its own monitor tap
+  (tracker.attachFeed).
+- New dependency: @radix-ui/react-popover 1.3.1 (MIT): the "What does this do?" popovers.
+- TEST INFRASTRUCTURE: real-time AudioContexts on this Mac stopped advancing in Playwright's
+  Chromium (a bare oscillator stays at 5 ms; the macOS output device is not pulling). Both
+  Playwright projects now launch Chromium with --disable-audio-output, a timer-driven fake sink,
+  so real-time tests no longer depend on the machine's sound device. All earlier real-time tests
+  pass with it.
+- Test hooks added: fakeMic ({ levelDbfs } noise, or 'echo' = programme 20 dB down),
+  calmSecondsPerMinute, calmFadeSeconds, and a per-frame hum estimate log (__clearlyHumLog).
+
+2026-11-10  M10 NAVIGATION, FIRST RUN, HOME, ACCESSIBILITY, PWA
+- Navigation: five destinations (Home, Hearing Check, Clear Audio, Quiet Lab, More). At 1024 px
+  and wider a left sidebar lists them with More's children (Listening Health, Profile and
+  Settings, Get Clearly Everywhere, About and privacy, Send feedback); 768-1023 px a rail of
+  icons whose label is the link text, shown as a tooltip on hover and keyboard focus; under
+  768 px a fixed bottom tab bar with safe-area padding. Only one is displayed at a time (the
+  others are display:none, so screen readers meet one "Main" navigation).
+- One icon set (ui/icons.tsx): 24 px grid, 2 px round strokes in currentColor.
+- Every sub-page uses one BackLink (arrow and the parent's name). PageHeading already set
+  document.title and moved focus to the h1 on every route change.
+- BUG FOUND: the token-only Tailwind theme had no 0 step in the spacing scale, so every "-0"
+  utility (bottom-0, inset-0, min-w-0, mt-0, p-0...) produced no CSS. A "0": 0px space token was
+  added; those utilities now work everywhere (this also fixed the fixed tab bar and the
+  sideways overflow at 200 percent text).
+- Grids with fr columns use minmax(0, Nfr) so wide content cannot widen the page; data tables
+  sit in a focusable, labelled scroll region (ui/TableScroll) so a wide table scrolls inside
+  itself and is reachable by keyboard (axe scrollable-region-focusable).
+- Appearance (Settings): Match my device / Light / Dark / High contrast, in localStorage and
+  applied in main.tsx before the first render (IndexedDB is asynchronous and would flash). RULES
+  asked for a High contrast switch; it had not been built until now.
+- First run (/welcome): four steps with the Stepper; Skip for now at any step; progress in kv
+  (onboarding {step, done}); Home's "Set up my sound" resumes at the saved step. Measure my
+  hearing leaves the flow for the Hearing Check; the results page then offers "Continue setting
+  up Clearly". N in "about N seconds" comes from expectedDurationSeconds.
+- Home: new person = one button; returning = "Start Clear Audio" (resumes the open source, the
+  demo, or for a tab reopens the coach and picker via /audio?tab=1; files cannot be reopened
+  without a new pick, so it goes to the sources page) and at most one suggestion from
+  homeSuggestion (Estimated, no speech-in-noise result, check older than 6 months, no backup,
+  the M08 reminder), unit-tested. With no suggestion, the older notices (monthly backup
+  reminder, storage tip) may show; still never more than one card.
+- "Hear an example": Voice focus, Night mode and Hum Filter (on its card in Clear Audio and on
+  the Quiet Lab card). It plays 8 s of the demo clip off, then 8 s on, through
+  buildProcessingGraph, with an announced label, only on tap, and pauses the main player first.
+  Not offered for Background cleanup (needs its download), Captions (not a sound change), Auto
+  Boost (needs a microphone and a noisy room) or Calm Sounds (it is the sound itself).
+- Copy sweep: copy.test.ts fails on banned words (whole words with simple inflections, any case;
+  "AI" in capitals), on "!", and on literal JSX text or text attributes (aria-label, title,
+  placeholder, alt, label) in any component; the developer-only /design page is exempt (not in
+  production builds). Allowlisted: calm.required and quiet.calm.cannot ("not a treatment").
+  Two strings used "treat" in its everyday sense and were reworded (pre.accuracy,
+  privacy.health). scripts/readability.ts scores every sentence (Flesch-Kincaid).
+- PWA: vite-plugin-pwa 2.0.0 (MIT), registerType "prompt", registered by the app
+  (useRegisterSW), "A new version is ready. Reload" card, never an automatic reload. Precache:
+  the app shell and every route chunk (globIgnores heavy/** and maps); heavy assets stay in their
+  own Cache API caches after an explicit download. navigateFallback index.html except /api and
+  /heavy. The service worker is only in production builds, so the e2e suite (dev server) has
+  none. Icons are drawn from the tokens by apps/web/scripts/make-icons.ts (no image tools).
+- Install offers (pwa/install.ts, unit-tested): beforeinstallprompt is captured in main.tsx and a
+  custom banner is offered once, after the first completed Hearing Check. Where that event never
+  fires, matchMedia('(display-mode: standalone)') is false, navigator.standalone is not true and
+  the 'standalone' property exists on navigator (the Add to Home Screen model), a one-time card
+  gives the manual steps. Never by browser name.
+- Offline indicator: a polite status line from online/offline events.
+- Lighthouse CI: @lhci/cli 0.16.0 run with pnpm dlx in a CI job against vite preview of the
+  production build; accessibility must be at least 0.95 on twelve main routes. Not added as a
+  dependency (CI-only tool).
+- BUG FIXED (M04): the API's 60-per-minute rate limit applied to every request, including the
+  built web app's own files, so a production page load (about 100 files) got 429. The limit now
+  applies to /api/ only (allowList), with a test.
+- New dependency: workbox-window 7.4.1 (MIT). vite-plugin-pwa's register module imports it; it
+  was not installed, so the import failed silently and the service worker never registered in
+  production. Found by loading the production build through apps/server.
+- Buttons: buttonClass drops its default text size, padding or min-height when the caller passes
+  one, because Tailwind cannot order two utilities from the same group.
+- Two-column layouts on Home and Clear Audio start at the wide breakpoint (1280 px): at 1024 px
+  the sidebar left too little room (design review 3).
+
+2026-11-10  M11 VIDEO EXPORT
+- LICENCE (open question 17, resolved by building our own core): every prebuilt ffmpeg.wasm
+  core is GPL (@ffmpeg/core 0.12.10: --enable-gpl with x264, x265, libvpx, LAME) or worse
+  (@ffmpeg.wasm/core-st 0.13.2: --enable-gpl --enable-nonfree with fdk-aac, not redistributable).
+  The owner installed Emscripten (7.0.0, Homebrew) and Clearly now builds its own single-thread
+  core: scripts/ffmpeg-wasm/build.sh (pnpm build:ffmpeg). FFmpeg 5.1.10 (release tarball from
+  ffmpeg.org, SHA-256 pinned in the script; no gpg here, so the checksum is the trust anchor),
+  configured with --disable-everything and only: protocols file, pipe; demuxers mov, matroska,
+  avi, mpegts, wav, srt, webvtt, ass; muxers mp4, mov, matroska, webm, framemd5, null, wav, srt,
+  webvtt; decoders h264, hevc, vp8, vp9, mpeg4 (probing only), pcm, aac, opus, text subtitles;
+  encoders aac (FFmpeg's native encoder), pcm_s16le, movtext, subrip, srt, webvtt, ass; the
+  video parsers; all bitstream filters; a few audio filters. No external libraries, no
+  --enable-gpl, --enable-nonfree or --enable-version3. The script refuses to finish unless
+  configure reports "LGPL version 2.1 or later" and CONFIG_GPL, CONFIG_NONFREE and
+  CONFIG_VERSION3 are 0, and checks config_components.h for every requested component
+  (configure silently ignores unknown names: "mov_text" is "movtext", found by the subtitle test).
+  Result: LGPL-2.1-or-later, 4.6 MB wasm (the GPL core is about 31 MB). ffmpeg -L in the browser
+  prints the LGPL notice (checked in a test run).
+- The JavaScript side is @ffmpeg/ffmpeg 0.12.15 (MIT, pinned), unchanged. Its core interface
+  comes from ffmpeg.wasm 0.12.15's fftools changes (ffmpeg() and ffprobe() callable repeatedly,
+  progress events, abort instead of exit), kept as scripts/ffmpeg-wasm/fftools-5.1.10-wasm.patch:
+  their patch against 5.1.4, rebased onto 5.1.10, except that it would have reverted 5.1.x's
+  codec_tag bounds fix, which is kept. bind.js is theirs (MIT, LICENSE-ffmpeg.wasm) with one
+  marked addition: Emscripten 4 and later no longer list file systems on FS.filesystems, which
+  the wrapper's mount() reads, so WORKERFS and MEMFS are put back there in preRun.
+- heavy-manifest.json entries may now name a build script instead of a URL ("build"); fetch:heavy
+  runs it when the file is missing or stale and verifies the SHA-256 either way. The checksum is
+  tied to Emscripten 7.0.0; another version warns and will not match.
+- Reading input (checked against the current API): @ffmpeg/ffmpeg 0.12.15 mount('WORKERFS',
+  { blobs: [{ name, data }] }, dir) reads a File or Blob in place through FileReaderSync in the
+  worker, so the source video is never copied into ffmpeg's memory file system. FFFSType is a
+  declared enum that the package does not export at runtime, so the string is passed.
+- Loading: the core files are fetched only after a tap (real size shown, metered connections
+  asked), verified, kept in the Cache API (clearly-heavy-v1), then given to @ffmpeg/ffmpeg as
+  blob URLs; its own module worker imports the core with import(). The wrapper's default CDN
+  URL is never used. Vite: @ffmpeg/ffmpeg is excluded from dependency pre-bundling, because its
+  worker is created with new URL('./worker.js', import.meta.url).
+- Pipeline: ffprobe JSON decides the container (MP4 for H.264, HEVC, AV1, VP9 and MPEG-4 Part 2;
+  MKV otherwise), never the file name extension. The enhanced audio is rendered by the M02 renderer into a
+  temporary 16-bit WAV in the Origin Private File System (sync access handle in the encoder
+  worker; folder clearly-export-tmp), then mounted with WORKERFS too. ffmpeg: -c:v copy, AAC
+  192 kbps native encoder, -map_metadata 0, -map_chapters 0, the source audio's stream tags on
+  the new audio, subtitles mapped where the container allows (MP4: text converted to mov_text,
+  picture subtitles left out and the person told; MKV: copied, mov_text to SubRip). Matroska
+  target tags such as MOVIE/TITLE, which the MP4 muxer would drop, are mapped to MP4's names.
+  Cover art goes along in MKV only. Output in ffmpeg's memory file system, read once, then saved
+  with showSaveFilePicker (streamed by the browser) or the platform save.
+- OPFS quota: private windows have a small storage quota, so the export checks
+  navigator.storage.estimate() and falls back to the Blob writer when the WAV would not fit
+  (found by the memory test, which needs a normal profile for the same reason).
+- Limits: video muxing up to 1 GB input; phones (coarse pointer only, or 2 GB of memory or less)
+  get no video option and a sentence saying why; audio export there stays at 30 minutes.
+- Estimate: the M05 render benchmark plus input bytes / 80 MB/s for muxing (about 90 MB/s on
+  the development machine; docs/perf.txt).
+- Test fixtures are generated in the browser (WebCodecs H.264, VP8, VP9, AAC and Opus through
+  mediabunny; the SubRip track added with Clearly's own ffmpeg, because FFmpeg 5.1 cannot read
+  the S_TEXT/WEBVTT track mediabunny writes in MKV). mediabunny 1.62.1 (MPL-2.0) is now also a
+  devDependency of apps/web, for those test hooks only.
+- BUG FIXED (M03 onward): test hooks shipped in production builds. Vite replaces only the dot
+  form import.meta.env.NAME at build time; the bracket form import.meta.env['VITE_TEST_HOOKS']
+  stayed a runtime lookup, so nothing was tree-shaken (the hooks were inert, as the flag is unset
+  in production, but the code shipped). VITE_TEST_HOOKS is now declared in src/env.d.ts and read
+  with the dot form; the production build contains no __clearlyTest or __clearlyVideo code and
+  the entry chunk shrank from 94.0 to 93.1 KB gzipped.
+
+2026-11-10  OWNER: M13 DROPPED
+- The owner removed milestone M13 from the plan. Its scaffold package, the "Coming soon" card on
+  Get Clearly Everywhere, its copy strings, its ignore rules and every mention in RULES.md,
+  PLAN.txt and STATUS.txt were removed. RULES.md now lists five packages. M14 follows M12.
+
+2026-11-10  M12 DESKTOP APP
+- Versions (checked on npm the same day): electron 45.2.3, electron-builder 26.18.0,
+  @electron/fuses 2.1.3, esbuild 0.28.2; all MIT. electron added to onlyBuiltDependencies (its
+  install script downloads the binary). APIs were checked against the installed electron.d.ts.
+- Bundling: esbuild makes dist/main.mjs (ES module main process) and dist/preload.cjs plus
+  dist/captionsPreload.cjs (sandboxed preloads cannot require npm packages). zod and the shared
+  schemas are bundled, so the installer has no node_modules; the desktop package's dependencies
+  are all devDependencies. Event names live in a zod-free module (@clearly/core/desktop-events) so
+  the captions preload stays 512 bytes.
+- IPC: the M12 prompt's channel list plus setGlobalShortcut, because the prompt makes the
+  shortcut configurable and asks for registration failures to show in Settings; that needs a
+  channel. Recorded here as the one addition.
+- BUG FOUND BY TESTS: Node's URL parser treats clearly: as a non-special scheme, whose origin is
+  the string "null", so an origin comparison rejected every app URL (every IPC call and
+  permission would have been denied). App URLs are compared by protocol and host.
+- Path traversal: the URL parser removes "." and ".." segments (also %2e%2e) before the handler
+  sees the path, so they resolve inside the web root; encoded slashes or backslashes, NUL bytes,
+  bad escapes and other hosts are refused (403). Unit-tested, including a real file next to the
+  root that is never served.
+- Electron 45: session permission, display-media handlers and defaultSession are available only
+  after app.ready (the first launch failed with "Session can only be received when app is
+  ready"); registerSchemesAsPrivileged runs before it, as required.
+- The Cache API accepts only http(s) requests, so on clearly://app heavy files are cached under
+  https://app.clearly.invalid/<path> (heavyCacheKey; the web keeps its existing keys). Without
+  this, the video tool and Background cleanup would never count as downloaded on desktop.
+- No service worker in the desktop app (PwaLayer is not loaded; files are local already).
+- Heavy files are not packaged (the installer would grow by hundreds of MB): /heavy/ requests not
+  found locally are fetched from CLEARLY_SERVER_URL by the main process; the app verifies them.
+- CAPTURE PER OS (Electron 45.2.3): Streams.audio 'loopback' is documented for Windows only.
+  macOS 27.0.1 on this machine: with audio 'loopback' getDisplayMedia fails with "AbortError:
+  Invalid capture constraints" (before Screen Recording was allowed) or does not answer within
+  15 s (after); without loopback it returns 1 video and 0 audio tracks. So getLoopbackSupport
+  reports system sound for Windows only, and macOS uses the virtual cable. Linux: documented as
+  unsupported, not tested here. Windows: not testable here (MANUAL_TESTS M12).
+  loopbackWithMute: documented, but no test here can confirm it keeps Clearly's own playback
+  audible, so it is off everywhere and the doubled-sound warning points to the cable.
+- Packaging checked locally (macOS arm64, unpacked): the asar holds dist/, static/ and web/ with
+  no heavy files or source maps; fuses read back as set; Info.plist has
+  NSMicrophoneUsageDescription; the packaged app loads, IndexedDB works on clearly://app, the
+  automatic backup is written, and the window state is saved on quit.
+- BUG FIXED (M11): the production server's CSP blocked the video tool. The core is imported from
+  a blob URL (script-src) and fetches its wasm from a blob URL (connect-src); vite preview sends
+  no CSP, so the earlier production check missed it. Both directives now include blob: on the
+  server and in the desktop app; only script already running on the origin can create a blob URL.
+  Verified with a real export through apps/server.
+- Known, not fixed (older): a dialog's scroll lock (Radix) injects a <style> element that the
+  CSP's style-src 'self' blocks. Nothing breaks except the page possibly scrolling behind an
+  open dialog. Logged as an open item.
+
+2026-11-10  M14 SECURITY PASS: DEPENDENCY AUDIT (pnpm audit; 0 critical, 0 high, 4 moderate, 1 low)
+- react-router 6.x (moderate x2; fixed only in 7.18): (1) open redirect through a backslash in
+  <Link to> or navigate(): every target in Clearly is a constant in the code; no user-supplied
+  string is ever passed to <Link> or navigate (restore codes, share links and file names are not
+  routes). (2) constructor injection through deserializeErrors(): only used when hydrating a
+  server-rendered data router; Clearly renders on the client only. Not exploitable here. RULES.md
+  names React Router 6; moving to 7 is the owner's call (open question 24).
+- glob <= 14.0.1 via @fastify/static (moderate; the only finding in production server code):
+  "AbortSignal cancellation bypass". @fastify/static calls glob once at startup to list the web
+  root, with no AbortSignal, never per request, so the bypass cannot happen. The fix is only in
+  glob 14, outside @fastify/static's ^13 range; no override (it could break the plugin). Recheck
+  when @fastify/static moves to glob 14. The same glob in workbox-build runs only at build time.
+- minimatch (moderate, ReDoS on crafted patterns) via eslint and electron-builder, and deepmerge
+  (low, prototype poisoning) via workbox-build: development and build tools only, fed only
+  patterns and config from this repository. Not shipped, no untrusted input.
+
+2026-11-10  M14 PHONES, FAULTS AND FALLBACKS
+- Tab capture is offered only where getDisplayMedia exists AND the suppressLocalAudioPlayback
+  constraint is supported (getSupportedConstraints). WebKit has getDisplayMedia but shares no tab
+  audio, so the option was a dead end there; the constraint is supported exactly where tab audio
+  capture is. Feature detection, unit-tested (platform/web.test.ts) and checked in WebKit.
+- Headphones unplugged: browsers move the sound to the next output (usually speakers) at the same
+  level. The player now watches devicechange; when an output disappeared (or, without device
+  permission, on any change) while sound plays, it pauses the media and holds the AudioContext,
+  and says why, with Play again. engine.hold() marks deliberate pauses so they are not reported as
+  system ones.
+- System suspension (calls, other apps, sleep): the engine already tracked "suspended" but nothing
+  showed it, so sound could stop without a word. A banner now says so with one button to turn the
+  sound back on (layout, all pages).
+- Calm Sounds lock screen: graph -> MediaStreamAudioDestinationNode -> hidden <audio> element with
+  Media Session metadata where Media Session exists. Not verified on a real phone; the card keeps
+  its "may pause when the screen locks" wording (MOBILE.txt).
+- Phone page QR code: qrcode 1.5.4 (MIT), loaded on demand, from VITE_PUBLIC_URL or the page's own
+  origin. Phone settings names checked against Apple and Google support pages on 2026-11-10.
+- Firefox: Playwright's Firefox does not start on this macOS 27 machine; CI runs it on Linux.
+- M13 (extension) parts of M14 skipped: no EXTENSION.txt, no extension test or CSP check, the
+  support matrix and fallback messages offer the desktop app or a file.
+
+2026-11-10  DEPLOYING THE WEB APP ON VERCEL (owner request)
+- apps/web/vercel.json: install only the root and the web app with its workspace packages
+  (pnpm --filter clearly --filter @clearly/web...; Electron and better-sqlite3 are not needed
+  for the site), skip the git-hook installer (SKIP_INSTALL_SIMPLE_GIT_HOOKS=1), run fetch:heavy
+  then the web build, serve dist/. Single-page-app rewrite to /index.html for every path except
+  /api/ (so the app sees "no server" as a plain 404) and /heavy/ (so a missing download is a 404,
+  not HTML). Headers: the exact CSP and security headers apps/server sends (a server test compares
+  them), long caching for hashed assets, no-cache for index.html, sw.js and the manifest.
+- The video tool cannot be compiled on Vercel (no Emscripten). heavy-manifest.json now gives the
+  two core files a prebuilt url as well as the build script: a GitHub release of this repository
+  (tag ffmpeg-core-5.1.10-clearly1), verified against the same SHA-256, so only the identical
+  build is accepted. fetch:heavy builds when it can, downloads the release copy otherwise, and with
+  HEAVY_SKIP_UNAVAILABLE=1 (set in the Vercel build command) skips it with a warning instead of
+  failing the deploy. The LGPL source folder is now written by scripts/ffmpeg-wasm/source-bundle.sh,
+  which needs no compiler, so it is served wherever the core is.
+- The optional API (apps/server: Fastify with a SQLite file) is not deployed on Vercel, which has
+  no persistent disk. Backup, restore codes and sync stay off; everything else works.
+
+2026-11-10  HEARING CHECK WITH COMPUTER SPEAKERS (owner request)
+- The pre-check asks "What will you listen with?": Headphones (default) or Computer speakers.
+  Speakers reach both ears, so one ear cannot be tested on its own. A speakers check therefore
+  runs one set of tracks (SessionConfig.ears = ['left']: 5 tracks in Express, 8 in Refine, about
+  half the tone trials), plays every tone at full level into both channels (tone generator ear
+  'both', the same ChannelMerger routing as the calibration ramp, so levels stay relative to Lc;
+  an offline test checks both channels are identical and within 0.1 dB of the requested peak),
+  and copies the result to both ears with mirrorEars before saving. Audiograms, loss, reliability,
+  referral and the sound settings then work unchanged; because both ears read the same, no
+  difference between the ears can be flagged, and the results, the PDF and the pre-check say so
+  and point to headphones for each ear on its own.
+- Records: an optional output field ('headphones' | 'speakers') on hearing-check and paused-Refine
+  records; older records have none and were all headphones (no migration needed). A Refine keeps
+  the Express check's output. The headphone name for a speakers check is "Computer speakers".
+- Calibration is unchanged: it already plays in both channels and asks for a comfortable level,
+  which works the same through speakers. Accuracy wording for speakers adds the room.

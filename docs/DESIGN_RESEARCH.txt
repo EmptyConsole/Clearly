@@ -1,0 +1,749 @@
+CLEARLY: DESIGN RESEARCH
+Milestone M00. Plain text, tracked. Last updated 2026-11-09.
+
+HOW THIS WAS DONE
+  Every reference below was opened live with Playwright (Chromium 158, headless) on 2026-11-09 at
+  1440, 1024 and 390 px wide. The tool is scripts/research/measure.ts. Screenshots (viewport and
+  full page) are saved under research/<slug>/ and are gitignored, never committed. Raw measurements
+  are in research/measurements.json (also gitignored); the values below are copied from it.
+
+  Measured per page: computed font family, size, weight, line height and tracking for body, p, h1,
+  h2, h3; the most frequent font sizes, spacing values (padding, margin, gap), text and background
+  colours (backgrounds weighted by area), corner radii, shadows, borders, transition durations and
+  easings, max-widths; paragraph line length in characters (paragraph width divided by the average
+  glyph width of a sample sentence in that font); heights of buttons and inputs; the focus style
+  of the first focusable element.
+
+  Limits, stated honestly: values come from the first screen of each home page (or one article),
+  not a whole site. Cookie banners were left in place and appear in some screenshots. Measured
+  button heights include links styled as buttons, so a few are nav links rather than primary
+  buttons. Acclaim sources were also opened with Playwright on 2026-11-09 and the quoted claim was
+  found on the page.
+
+  Principle: learn proportions and principles, never copy. No logo, copy, illustration,
+  photography, proprietary font or distinctive layout from any reference is used in Clearly.
+
+SHORTLIST (13 references)
+  Accessibility, older and non-technical people: GOV.UK, NHS.UK, U.S. Web Design System
+  Health, wellness, calm technology:              Headspace, Gentler Streak, Apple AirPods hearing health
+  Focused utility tools:                          Flighty, Things 3, Shazam
+  Editorial, reading-first:                       The Guardian (long-read article), The Pudding
+  High-craft product sites:                       Stripe, Linear
+
+
+1. GOV.UK
+   Category: Accessibility / older and non-technical people
+   Opened:   https://www.gov.uk/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Design Museum Design of the Year 2013
+     (https://blogs.fcdo.gov.uk/johnpreece/2013/04/19/gov-uk-wins-design-of-the-year-2013, opened
+     2026-11-09). Public design system with a published accessibility strategy
+     (https://design-system.service.gov.uk/community/accessibility-strategy/, opened 2026-11-09).
+   Measured (1440 px unless stated):
+     body: "GDS Transport" 16px/normal weight 400 tracking normal
+     paragraph: "GDS Transport" 19px/25px weight 400 tracking normal
+     h1: "GDS Transport" 64px/76.8px weight 700 tracking normal
+     h1 at 390 px: "GDS Transport" 40px/48px weight 700 tracking normal
+     h2: "GDS Transport" 24px/30px weight 700 tracking normal
+     h3: "GDS Transport" 19px/25px weight 700 tracking normal
+     families: "GDS Transport", Arial
+     common sizes: 19px, 16px, 30px, 36px, 24px, 13.3333px, 64px, 28.5px
+     spacing: 20px, 10px, 5px, 15px, 30px, 19px, 60px, 8px, 25px, 17px, -1px, 40px
+     text colours: rgb(0, 0, 0), rgb(11, 12, 12), rgb(26, 101, 166), rgb(255, 255, 255)
+     backgrounds: rgb(244, 248, 251), rgb(29, 112, 184), rgb(255, 255, 255), rgb(15, 122, 82)
+     radii: none
+     shadows: rgb(11, 12, 12) 0px 3px 0px 0px; rgb(8, 61, 41) 0px 2px 0px 0px
+     borders: 1px rgb(206, 206, 206), 4px rgb(29, 112, 184), 1px rgb(11, 12, 12)
+     transitions: none
+     max-widths: 640px, 960px, 100%, 80%
+     line length: median 71, max 77 characters (390 px: median 38, max 44)
+     buttons: 38px h, radius 0px, border 2px rgba(0, 0, 0, 0), bg rgb(15, 122, 82), 19px/400
+     inputs: 50px h, radius 0px, border 0px rgb(11, 12, 12), bg rgb(255, 255, 255), 19px/400
+     focus: outline 3px solid rgba(0, 0, 0, 0) offset 0px; box-shadow rgb(11, 12, 12) 0px 2px 0px
+       0px
+     document width at 1024: 1024
+   What makes it feel well made:
+     Feels well made because it is relentlessly plain: one humanist sans, 19 px body at 25 px
+     leading, headings sized for a quick scan (64 px desktop, 40 px phone), a 640 px reading
+     column (about 71 characters per line measured), square corners, and a focus style built from
+     a 3 px outline plus a solid dark 2 px underline (box-shadow), measured on the first focusable
+     element. Buttons carry a 2-3 px solid bottom edge in a darker shade, which reads as pressable
+     without any blur. No transitions at all.
+   What does not suit Clearly:
+     Does not suit: GDS Transport is proprietary to the UK government; the blue band and crown
+     branding are theirs; zero radius and no motion feel institutional rather than calm. Leading
+     of 1.32 is tighter than our 1.6 rule.
+
+2. NHS.UK
+   Category: Accessibility / older and non-technical people
+   Opened:   https://www.nhs.uk/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Public design system and service manual (https://service-manual.nhs.uk/design-system, opened
+     2026-11-09). One of the most visited health sites in the UK.
+   Measured (1440 px unless stated):
+     body: "Frutiger W01" 16px/normal weight 400 tracking normal
+     paragraph: "Frutiger W01" 19px/28px weight 400 tracking normal
+     h1: "Frutiger W01" 32px/36px weight 600 tracking normal
+     h1 at 390 px: "Frutiger W01" 24px/28.5px weight 600 tracking normal
+     h2: "Frutiger W01" 22px/30.25px weight 600 tracking normal
+     h3: "Frutiger W01" 26px/32px weight 600 tracking normal
+     families: "Frutiger W01"
+     common sizes: 16px, 19px, 22px, 26px, 36px, 32px, 43.2px
+     spacing: 16px, 24px, 8px, 32px, 2px, 35px, 12px, 39.6px, -1px, 64px, 14px, 1px
+     text colours: rgb(33, 43, 50), rgb(255, 255, 255), rgb(0, 94, 184), rgb(0, 48, 135)
+     backgrounds: rgb(255, 255, 255), rgb(240, 244, 245), rgb(0, 94, 184), rgb(216, 221, 224)
+     radii: 4px, 4px 0px 0px 4px, 0px 4px 4px 0px
+     shadows: rgb(216, 221, 224) 0px 3px 0px 0px; rgb(0, 64, 30) 0px 4px 0px 0px
+     borders: 1px rgb(216, 221, 224), 2px rgba(0, 0, 0, 0), 1px rgb(255, 255, 255)
+     transitions: none
+     max-widths: 960px, 704px, 100%
+     line length: median 38, max 125 characters (390 px: median 47, max 53)
+     buttons: 60px h, radius 4px, border 2px rgba(0, 0, 0, 0), bg rgb(0, 127, 59), 19px/600
+     inputs: 40px h, radius 4px 0px 0px 4px, border 1px rgb(255, 255, 255), bg rgb(255, 255, 255),
+       16px/400
+     focus: outline 4px solid rgba(0, 0, 0, 0) offset 4px; box-shadow rgb(33, 43, 50) 0px 4px 0px
+       0px
+     document width at 1024: 1024
+   What makes it feel well made:
+     Health content for every age and reading level. 19 px body at 28 px leading (1.47), headings
+     at 600 weight not 700, 4 px radius, 60 px tall primary buttons with a 4 px darker bottom
+     edge, a 4 px focus outline with 4 px offset, and a pale grey-blue page band (#F0F4F5) behind
+     white cards so cards separate without shadows. Spacing steps are clean multiples of 8 (8, 16,
+     24, 32, 64).
+   What does not suit Clearly:
+     Does not suit: Frutiger is licensed; NHS blue is a protected brand colour; the
+     photography-led hero is not our look. Some long paragraphs measured 125 characters per line
+     on wide screens, which is too long.
+
+3. U.S. Web Design System
+   Category: Accessibility / older and non-technical people
+   Opened:   https://designsystem.digital.gov/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Official design system of the US federal government (https://designsystem.digital.gov/,
+     opened 2026-11-09).
+   Measured (1440 px unless stated):
+     body: "Public Sans Web" 16px/25.6px weight 400 tracking normal
+     paragraph: "Public Sans Web" 12px/14.4px weight 400 tracking normal
+     h1: "Public Sans Web" 36px/46.8px weight 200 tracking normal
+     h1 at 390 px: "Public Sans Web" 36px/46.8px weight 200 tracking normal
+     h2: "Public Sans Web" 16.96px/25.44px weight 700 tracking normal
+     h3: "Public Sans Web" 14.08px/19.712px weight 400 tracking normal
+     families: "Public Sans Web", "Source Sans Pro Web"
+     common sizes: 16px, 15.04px, 16.96px, 14.08px, 12px, 20px, 14.88px, 12.96px
+     spacing: 16px, 8px, 4px, 32px, 12px, 2px, 20px, 48px, 64px, 24px, 40px
+     text colours: rgba(0, 0, 0, 0.8), rgb(27, 27, 27), rgb(255, 255, 255), rgb(0, 94, 162)
+     backgrounds: rgb(240, 240, 240), rgb(230, 230, 230), rgb(27, 27, 27), rgb(37, 47, 62)
+     radii: 4px, 50%, 0px 4px 4px 0px
+     shadows: rgba(0, 0, 0, 0.1) 0px 1px 4px 0px; rgb(229, 160, 0) 0px 0px 0px 2px inset
+     borders: 1px rgb(92, 92, 92)
+     transitions: 0.15s ease-in-out
+     max-widths: 100%, 1400px, 72px, 480px, 50%
+     line length: median 44, max 169 characters (390 px: median 38, max 62)
+     buttons: 14px h, radius 0px, border 0px rgb(201, 201, 201), bg rgba(0, 0, 0, 0), 12px/400
+     inputs: 38px h, radius 0px, border 1px rgb(92, 92, 92), bg rgb(19, 23, 31), 16px/400
+     focus: outline 4px solid rgb(36, 145, 255) offset 0px; box-shadow none
+     document width at 1024: 1024
+   What makes it feel well made:
+     Public Sans (OFL) and a token system built on an 8 px grid (measured steps 4, 8, 16, 24, 32,
+     48, 64). Focus is a 4 px solid bright blue outline. Transitions are short (150 ms
+     ease-in-out). Useful as proof that an open-licence sans and a strict spacing scale can carry
+     a large accessible system.
+   What does not suit Clearly:
+     Does not suit: the home page measured 12-16 px secondary text, below our 18 px floor; a
+     200-weight 36 px heading is too light for older eyes; the red-and-blue palette is patriotic
+     branding.
+
+4. Headspace
+   Category: Health, wellness, calm technology
+   Opened:   https://www.headspace.com/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Webby Awards 2018 People's Voice Winner, Health, Wellness and Fitness apps
+     (https://winners.webbyawards.com/2018/apps-and-software/general-mobile-ott-apps/health-fitness/43937/headspace,
+     opened 2026-11-09).
+   Measured (1440 px unless stated):
+     body: "Headspace Apercu" 16px/18.4px weight 400 tracking normal
+     paragraph: "Headspace Apercu" 18px/26px weight 500 tracking -0.18px
+     h1: not present
+     h1 at 390 px: not present
+     h2: "Headspace Apercu" 32px/38.4px weight 700 tracking -0.96px
+     h3: "Headspace Apercu" 40px/46px weight 700 tracking -1.2px
+     families: "Headspace Apercu"
+     common sizes: 16px, 12px, 18px, 24px, 20px, 0px, 16.5186px, 32px
+     spacing: 4px, 24px, 6px, 8px, 16px, 32px, -4px, 48px, 10px, 12px, 64px, 19.2px
+     text colours: rgb(75, 76, 77), rgb(68, 66, 63), rgb(45, 44, 43), rgb(255, 255, 255)
+     backgrounds: rgb(255, 206, 0), rgb(0, 97, 239), rgb(0, 164, 255), rgb(255, 255, 255)
+     radii: 16px, 50%, 32px, 8px, 24px, 800px
+     shadows: rgba(65, 61, 69, 0.2) 0px 2px 0px 0px; rgba(20, 19, 19, 0.2) 0px 3.23px 6.45px 0px
+     borders: 2px rgba(0, 0, 0, 0), 2px rgb(226, 222, 217), 2px rgb(255, 255, 255)
+     transitions: 0.15s, 0.15s, 0.15s, 0.15s, 0.15s cubic-bezier(0.32, 0.94, 0.6, 1), cu; 0.3s
+       ease; 0.4s, 0.4s cubic-bezier(0.32, 0.94, 0.6, 1), cubic-bezier(0.32, 0.94,
+     max-widths: 327px, 352px, 136px, 48px, 336px
+     line length: median 89, max 180 characters (390 px: median 47, max 49)
+     buttons: 78px h, radius 8px, border 2px rgb(226, 222, 217), bg rgb(255, 255, 255), 16px/400
+     inputs: 8px h, radius 0px, border 0px rgb(16, 16, 16), bg rgb(255, 255, 255), 16px/400
+     focus: outline 1px auto rgb(0, 95, 204) offset 1px; box-shadow none
+     document width at 1024: 1024
+   What makes it feel well made:
+     Warm and friendly without being childish: 18 px body at 26 px leading, headings tightened by
+     about -0.03 em, generous 16-32 px radii, warm greys (#4B4C4D, #44423F) rather than cold ones,
+     and borders made of a warm 2 px #E2DED9. Motion is quick (100-150 ms) with a custom ease-out.
+   What does not suit Clearly:
+     Does not suit: the page we opened was a promotion (yellow banner, '50% off'), large saturated
+     orange and blue blocks, illustrated characters and a proprietary typeface (Apercu). Clearly
+     avoids sales pressure. Large radii everywhere is on our banned list.
+
+5. Gentler Streak
+   Category: Health, wellness, calm technology
+   Opened:   https://gentler.app/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Apple Design Award 2024 winner, Social Impact
+     (https://www.apple.com/newsroom/2024/06/apple-announces-winners-of-the-2024-apple-design-awards/,
+     opened 2026-11-09).
+   Measured (1440 px unless stated):
+     body: sans-serif 12px/normal weight 400 tracking normal
+     paragraph: Inter 16px/24px weight 400 tracking normal
+     h1: Inter 60px/72px weight 700 tracking -1.8px
+     h1 at 390 px: Inter 32px/38.4px weight 700 tracking -0.96px
+     h2: Inter 44px/48.4px weight 600 tracking -1.76px
+     h3: not present
+     families: sans-serif, Inter, Georgia
+     common sizes: 12px, 14px, 17px, 16px, 20px, 60px, 24px, 44px
+     spacing: 10px, 8px, 16px, 24px, 4px, 12px, 44px, 100px, 40px, 2px, 20px, 64px
+     text colours: rgb(0, 0, 0), rgb(0, 0, 238), rgb(255, 255, 255), rgba(255, 255, 255, 0.6)
+     backgrounds: rgb(255, 255, 255), rgb(242, 242, 247), rgb(0, 0, 0), rgba(242, 242, 247, 0.8)
+     radii: 30px, 24px, 100px, 12px, 40px, 50%
+     shadows: rgba(0, 0, 0, 0.1) 0px 10px 30px 0px
+     borders: none
+     transitions: none
+     max-widths: 100%, 1200px, 460px, 1400px
+     line length: median 57, max 81 characters (390 px: median 43, max 47)
+     buttons: 34px h, radius 64px, border 0px rgb(0, 0, 0), bg rgba(0, 0, 0, 0.2), 12px/400
+     inputs: none measured
+     focus: outline 1px auto rgb(0, 95, 204) offset 1px; box-shadow none
+     document width at 1024: 1024
+   What makes it feel well made:
+     A health product that refuses to shame: its copy is about pace and rest rather than streaks.
+     Inter at 16/24 body, display headings at 60 px with -0.03 em tracking, a soft system grey
+     (#F2F2F7) for raised areas, one diffuse shadow used sparingly.
+   What does not suit Clearly:
+     Does not suit: full-bleed photography, 30-100 px pill radii, 12-14 px small text, and a dark
+     hero over a photo. Its tone (kind, non-judging) is the lesson, not its visuals.
+
+6. Apple AirPods Pro hearing health
+   Category: Health, wellness, calm technology
+   Opened:   https://www.apple.com/airpods-pro/hearing-health/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Chosen as the most widely used consumer hearing-health feature and the closest product to
+     Clearly's subject. No award claimed.
+   Measured (1440 px unless stated):
+     body: "SF Pro Text" 17px/25px weight 400 tracking -0.374px
+     paragraph: "SF Pro Display" 80px/84px weight 600 tracking -1.2px
+     h1: "SF Pro Text" 34px/50px weight 600 tracking -0.374px
+     h1 at 390 px: "SF Pro Text" 34px/50px weight 600 tracking -0.374px
+     h2: "SF Pro Text" 25.5px/37.5px weight 600 tracking -0.374px
+     h3: "SF Pro Display" 80px/84px weight 600 tracking -1.2px
+     families: "SF Pro Text", "SF Pro Display"
+     common sizes: 17px, 12px, 24px, 21px, 44px, 19px, 80px, 32px
+     spacing: 9.6px, 24px, 8px, 60px, 2px, 10px, 5px, 18px, 22px, 3px, 9px, 16px
+     text colours: rgb(29, 29, 31), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.72)
+     backgrounds: rgb(245, 245, 247), rgb(255, 255, 255), rgb(17, 77, 210), rgb(0, 113, 227)
+     radii: 18px, 980px
+     shadows: none
+     borders: 1px rgba(0, 0, 0, 0)
+     transitions: 0.32s cubic-bezier(0.4, 0, 0.6, 1); 0.24s cubic-bezier(0.4, 0, 0.6, 1); 0.3s
+       ease-in
+     max-widths: 100%, 980px, 66.6667%, 83.3333%, 1100px
+     line length: median 53, max 141 characters (390 px: median 38, max 55)
+     buttons: 44px h, radius 0px, border 0px rgba(0, 0, 0, 0.8), bg rgba(0, 0, 0, 0), 17px/400
+     inputs: none measured
+     focus: outline 2px solid rgb(0, 113, 227) offset -7px; box-shadow none
+     document width at 1024: 1024
+   What makes it feel well made:
+     Measured 17 px body at 25 px leading (1.47) with -0.022 em tracking, 980 px content width, a
+     calm neutral #F5F5F7 band behind white, 18 px radius on media tiles, and slow, smooth easings
+     (240-320 ms, cubic-bezier(0.4, 0, 0.6, 1)). Explains hearing in short, plain sentences next
+     to large illustrations.
+   What does not suit Clearly:
+     Does not suit: SF Pro is licensed for Apple platforms only; the gradient 'Pioneering
+     hearing.' headline is gradient text, which our rules ban; 80 px display type and
+     scroll-driven animation are too theatrical; we must not imply a hearing aid or a medical
+     test.
+
+7. Flighty
+   Category: Focused utility
+   Opened:   https://flighty.com/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Apple Design Award 2023 winner, Interaction
+     (https://www.apple.com/newsroom/2023/06/apple-announces-winners-of-the-2023-apple-design-awards/,
+     opened 2026-11-09).
+   Measured (1440 px unless stated):
+     body: sans-serif 12px/normal weight 400 tracking normal
+     paragraph: "system-ui" 14px/16.8px weight 500 tracking normal
+     h1: "system-ui" 65px/78px weight 700 tracking -1px
+     h1 at 390 px: "system-ui" 65px/71.5px weight 700 tracking -1px
+     h2: "system-ui" 56px/56px weight 700 tracking -0.28px
+     h3: "system-ui" 44px/48.4px weight 700 tracking normal
+     families: sans-serif, "system-ui", Inter, "EB Garamond"
+     common sizes: 12px, 15px, 16px, 13px, 32px, 17px, 14px, 24px
+     spacing: 10px, 16px, 20px, 8px, 4px, 40px, 32px, 6px, 12px, 24px, 64px, 48px
+     text colours: rgb(0, 0, 0), rgb(0, 0, 238), rgba(0, 0, 0, 0.5), rgb(255, 255, 255)
+     backgrounds: rgb(255, 255, 255), rgb(5, 1, 13), rgb(250, 250, 250), rgba(0, 0, 0, 0.02)
+     radii: 16px, 999px, 12px, 20px, 99px, 8px
+     shadows: rgba(0, 0, 0, 0.02) 0px 0px 0px 1px, rgba(0, 0, 0, 0.02) 0px 1px 1px 0.5px, rgba(0,
+       0, 0, ; rgba(0, 0, 0, 0.04) 0px 0px 0px 1px, rgba(0, 0, 0, 0.02) 0px 1px 1px 0.5px, rgba(0,
+       0, 0,
+     borders: none
+     transitions: none
+     max-widths: 600px, 1000px, 680px, 40%, 38%
+     line length: median 39, max 94 characters (390 px: median 41, max 46)
+     buttons: 23px h, radius 0px, border 0px rgba(0, 0, 0, 0.55), bg rgba(0, 0, 0, 0), 15px/400
+     inputs: 34px h, radius 8px, border 0px rgb(68, 68, 68), bg rgb(238, 238, 238), 14px/400
+     focus: outline 1px auto rgb(0, 95, 204) offset 1px; box-shadow none
+     document width at 1024: 1024
+   What makes it feel well made:
+     Does one job, live flight status, and shows it as real information rather than decoration:
+     the product's own data (routes, delays) is the illustration. System font, bold 65 px headline
+     with tight -1 px tracking, layered hairline shadows (1 px rings at 2-4 percent alpha) instead
+     of heavy elevation, 12-16 px radii on cards.
+   What does not suit Clearly:
+     Does not suit: lots of 12-15 px text, a dense phone-mockup hero, and decorative serif
+     accents. Its 'data as illustration' idea is what we take: our audiogram and frequency curves
+     play that role.
+
+8. Things 3
+   Category: Focused utility
+   Opened:   https://culturedcode.com/things/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Apple Design Award, twice (stated on https://culturedcode.com/things/, opened 2026-11-09).
+   Measured (1440 px unless stated):
+     body: ui-sans-serif 18px/25.2px weight 400 tracking normal
+     paragraph: ui-sans-serif 23.994px/29.9925px weight 400 tracking normal
+     h1: ui-sans-serif 23.994px/29.9925px weight 400 tracking normal
+     h1 at 390 px: ui-sans-serif 20.25px/25.3125px weight 400 tracking normal
+     h2: ui-sans-serif 36px/36px weight 700 tracking normal
+     h3: ui-sans-serif 20.25px/24.3px weight 700 tracking normal
+     families: ui-sans-serif
+     common sizes: 18px, 15.3px, 13px, 20.25px, 16px, 13.5px, 15.2px, 15px
+     spacing: 27px, 4.59px, 10.125px, 12.8px, 6.5px, 9px, 18px, 40px, 2px, 57.5938px, 36px, 3.25px
+     text colours: rgb(48, 51, 54), rgba(0, 15, 36, 0.46), rgb(142, 145, 150), rgb(37, 118, 235)
+     backgrounds: rgb(242, 245, 247), rgb(255, 255, 255), rgb(251, 252, 254), rgb(79, 145, 251)
+     radii: 18px, 3px, 4.5px, 6px, 12.8px, 10.8px
+     shadows: rgba(0, 0, 0, 0.1) 0px 2px 8px 0px, rgba(0, 0, 0, 0.1) 0px 0px 2px 0px; rgba(38, 52,
+       74, 0.15) 0px 1px 0px 0px
+     borders: 1px rgb(223, 227, 232), 1px rgba(0, 0, 0, 0), 1px rgba(0, 28, 70, 0.12)
+     transitions: 0.1s ease-out; 0.2s ease-out
+     max-widths: 100%, 900px, 85%, 90%, 75%
+     line length: median 49, max 71 characters (390 px: median 34, max 51)
+     buttons: 32px h, radius 6px, border 0px rgb(48, 51, 54), bg rgba(0, 0, 0, 0), 15px/600
+     inputs: 36px h, radius 6.4px, border 1px rgb(223, 227, 232), bg rgb(255, 255, 255), 16px/400
+     focus: outline 1px auto rgb(0, 95, 204) offset 1px; box-shadow none
+     document width at 1024: 1024
+   What makes it feel well made:
+     A calm, airy task manager page: 18 px body at 25 px leading, a 900 px max width, cool
+     off-white backgrounds (#F2F5F7, #FBFCFE), soft 1 px borders (#DFE3E8), 6 px control radius,
+     two-layer subtle shadows, and short ease-out transitions (100 and 200 ms). Paragraph line
+     length capped at 71 characters.
+   What does not suit Clearly:
+     Does not suit: the app icon is the hero; 13-15 px secondary text is too small for our users;
+     blue accent is their brand.
+
+9. Shazam
+   Category: Focused utility
+   Opened:   https://www.shazam.com/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Chosen as one of the most-used single-purpose consumer apps (recognise the song that is
+     playing); closest in spirit to Clearly's 'listen and help' job. No award claimed.
+   Measured (1440 px unless stated):
+     body: Times 16px/normal weight 400 tracking normal
+     paragraph: NeueMontreal 14px/normal weight 700 tracking 0.5px
+     h1: NeueMontreal 60px/63px weight 700 tracking -0.6px
+     h1 at 390 px: NeueMontreal 30px/31.5px weight 700 tracking -0.3px
+     h2: NeueMontreal 16px/normal weight 400 tracking 0.5px
+     h3: NeueMontreal 16px/normal weight 400 tracking 0.5px
+     families: Times, NeueMontreal, Arial
+     common sizes: 16px, 13.3333px, 18px, 32px, 14px, 12px, 24px, 8px
+     spacing: 15px, 1px, 20px, 5px, 6px, 16px, -13px, 10px, 8px, 40px, 4px, 30px
+     text colours: rgb(0, 0, 0), rgb(255, 255, 255), rgb(0, 0, 238), rgb(58, 58, 60)
+     backgrounds: rgb(242, 242, 247), rgb(1, 1, 1), rgb(0, 0, 0), rgba(0, 0, 0, 0.3)
+     radii: 8px, 50%, 10px, 24px, 16px, 4.5px
+     shadows: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px; rgba(0, 0, 0, 0.3) 0px 8px 30px 0px, rgba(255,
+       255, 255, 0.1) 0px 0px 5px 0px inset
+     borders: 1px rgba(255, 255, 255, 0.1), 0px rgb(0, 0, 0), 1px rgb(148, 148, 148)
+     transitions: 0.3s, 0.3s ease, ease; 0.3s ease; 0.1s linear
+     max-widths: 65%, 1340px, 1128px, 1600px, 671px
+     line length: median 41, max 243 characters (390 px: median 39, max 66)
+     buttons: 36px h, radius 0px, border 0px rgb(0, 0, 0), bg rgba(0, 0, 0, 0), 13.3333px/400
+     inputs: 42px h, radius 0px, border 1px rgb(148, 148, 148), bg rgba(0, 0, 0, 0), 18px/400
+     focus: outline 1px auto rgb(0, 95, 204) offset 0px; box-shadow none
+     document width at 1024: 1024
+   What makes it feel well made:
+     Shows how a one-button product presents its single action. NeueMontreal display at 60 px with
+     slight negative tracking, alternating light grey (#F2F2F7) and black bands, 8-24 px radii.
+   What does not suit Clearly:
+     Does not suit: dark, image-heavy marketing for music charts; small 11-14 px labels; dark
+     translucent overlays and a soft white inner glow on cards (measured inset shadow), both close
+     to patterns on our banned list. Proprietary type.
+
+10. The Guardian (long-read article)
+   Category: Editorial / reading-first
+   Opened:   https://www.theguardian.com/news/series/the-long-read
+             followed to https://www.theguardian.com/news/2026/oct/22/everyone-hates-oxford-street-will-pedestrianisation-save-it
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Chosen as one of the most-read English-language news sites, famous for its typographic
+     system. Measured on a long-read article reached from
+     https://www.theguardian.com/news/series/the-long-read. No award claimed.
+   Measured (1440 px unless stated):
+     body: Times 16px/16px weight 400 tracking normal
+     paragraph: "GH Guardian Headline" 20px/23px weight 500 tracking normal
+     h1: Times 16px/16px weight 400 tracking normal
+     h1 at 390 px: Times 16px/16px weight 400 tracking normal
+     h2: "GH Guardian Headline" 24px/27.6px weight 700 tracking normal
+     h3: "GH Guardian Headline" 17px/19.55px weight 700 tracking normal
+     families: Times, GuardianTextSans, "GH Guardian Headline", GuardianTextEgyptian
+     common sizes: 16px, 17px, 14px, 13.3333px, 15px, 24px, 12px, 20px
+     spacing: 12px, 6px, -1px, 8px, 4px, 3px, 2px, 20px, 10px, 24px, 9px, 1px
+     text colours: rgb(18, 18, 18), rgb(255, 255, 255), rgb(0, 0, 0), rgb(112, 112, 112)
+     backgrounds: rgb(255, 255, 255), rgb(5, 41, 98), rgb(246, 246, 246), rgb(241, 248, 252)
+     radii: 50%, 12px, 100%, 36px, 24px, 44px
+     shadows: rgb(199, 0, 0) -6px 0px 0px 0px, rgb(199, 0, 0) 6px 0px 0px 0px; rgb(0, 119, 182)
+       0px 0px 0px 3px
+     borders: 1px rgb(220, 220, 220), 1px rgb(199, 0, 0), 1px rgb(186, 186, 186)
+     transitions: 0.3s ease-in-out; 0.08s ease-out; 0.2s cubic-bezier(0.27, 1.06, 0.18, 1)
+     max-widths: 300px, 1300px, 492px, 620px, 1152px
+     line length: median 76, max 77 characters (390 px: median 54, max 54)
+     buttons: 22px h, radius 0px, border 0px rgb(255, 255, 255), bg rgba(0, 0, 0, 0), 17px/400
+     inputs: 44px h, radius 4px, border 1px rgb(112, 112, 112), bg rgb(255, 255, 255), 17px/400
+     focus: outline 0px none rgb(0, 0, 0) offset 1px; box-shadow rgb(0, 119, 182) 0px 0px 0px 3px
+     document width at 1024: 1024
+   What makes it feel well made:
+     Article body at 17 px with 23.8 px leading (1.4) in a slab serif, a 620 px text column (about
+     76 characters per line on desktop, 54 on a phone), strong headline weights, white background
+     with #121212 near-black text, and a 3 px solid focus ring in a separate blue (box-shadow).
+     Spacing is tight and grid-driven.
+   What does not suit Clearly:
+     Does not suit: proprietary Guardian fonts and the navy masthead are brand assets; the page we
+     opened was dominated by a privacy banner and a fundraising appeal; 1.4 leading and 17 px are
+     below our minimums.
+
+11. The Pudding
+   Category: Editorial / reading-first
+   Opened:   https://pudding.cool/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Information is Beautiful Awards 2024, Outstanding Studio Gold
+     (https://informationisbeautifulawards.com/news/680-announcing-the-2024-winners, opened
+     2026-11-09).
+   Measured (1440 px unless stated):
+     body: "Gooper SemiCondensed" 16px/22.4px weight 400 tracking normal
+     paragraph: "Atlas Grotesk" 14px/18.55px weight 400 tracking normal
+     h1: not present
+     h1 at 390 px: not present
+     h2: not present
+     h3: "Gooper SemiCondensed" 32px/32px weight 500 tracking -0.8px
+     families: "Gooper SemiCondensed", "Atlas Grotesk", "Atlas Typewriter"
+     common sizes: 16px, 14px, 32px, 12.8px, 24px
+     spacing: 8px, 16px, 4px, 32px, 12px, 48px, 24px, 36px, 10px, 64px, 18px, 256px
+     text colours: rgb(38, 38, 38), rgb(0, 0, 0), rgb(109, 109, 109), rgb(255, 255, 255)
+     backgrounds: rgb(233, 36, 32), rgb(213, 153, 42), rgb(223, 32, 223), rgb(154, 76, 173)
+     radii: 28px, 2px, 6px, 3px
+     shadows: rgba(0, 0, 0, 0.3) 0px 2px 1px 0px
+     borders: 1px rgb(38, 38, 38), 1px rgba(48, 48, 48, 0.4)
+     transitions: 0.25s, 0.25s ease, ease; 0.1s ease; 0.25s ease
+     max-widths: 100%, 1280px, 300px, 150px, 256px
+     line length: median 51, max 51 characters (390 px: median 47, max 53)
+     buttons: 56px h, radius 2px, border 0px rgb(255, 255, 255), bg rgba(0, 0, 0, 0), 12.8px/400
+     inputs: 32px h, radius 6px, border 1px rgba(48, 48, 48, 0.4), bg rgb(255, 255, 255), 16px/400
+     focus: outline 2px solid rgb(58, 230, 96) offset 2px; box-shadow none
+     document width at 1024: 1024
+   What makes it feel well made:
+     Visual essays where every chart is the story. Strong typographic voice (a condensed display
+     face with a grotesque for text), a clean 8 px spacing rhythm (8, 16, 24, 32, 48, 64
+     measured), 2-6 px radii, and plain 1 px borders. Teaches us to treat our audiograms and
+     curves as editorial content with real labels.
+   What does not suit Clearly:
+     Does not suit: loud saturated card colours (red, mustard, magenta) and playful hand-drawn
+     type; 14 px text; magenta and purple are on our banned list.
+
+12. Stripe
+   Category: High-craft product site
+   Opened:   https://stripe.com/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Featured in the Awwwards inspiration collection
+     (https://www.awwwards.com/inspiration/stripe-2, opened 2026-11-09). This is a curated
+     listing, not an award; Stripe was chosen for its long-standing reputation for typography and
+     spacing among designers.
+   Measured (1440 px unless stated):
+     body: sohne-var 16px/normal weight 400 tracking normal
+     paragraph: sohne-var 32px/35.2px weight 300 tracking -0.64px
+     h1: sohne-var 48px/55.2px weight 300 tracking -0.96px
+     h1 at 390 px: sohne-var 34px/35.02px weight 300 tracking -0.34px
+     h2: sohne-var 32px/35.2px weight 300 tracking -0.64px
+     h3: sohne-var 26px/29.12px weight 300 tracking -0.26px
+     families: sohne-var
+     common sizes: 16px, 10px, 14px, 12px, 26px, 9px, 22px, 8px
+     spacing: 8px, 16px, 4px, 32px, 12px, 24px, 64px, 6px, 10px, 14px, 40px, 14.5px
+     text colours: rgb(0, 0, 0), rgb(83, 58, 253), rgb(80, 97, 122), rgb(6, 27, 49)
+     backgrounds: rgb(255, 255, 255), rgb(229, 237, 245), rgb(248, 250, 253), rgb(13, 23, 56)
+     radii: 4px, 6px, 5px, 8px, 100%, 2px
+     shadows: rgba(50, 50, 93, 0.12) 0px 16px 32px 0px; rgba(0, 0, 0, 0.1) 0px 30px 60px -50px,
+       rgba(50, 50, 93, 0.25) 0px 30px 60px -10px
+     borders: 1px rgb(229, 237, 245), 1px rgb(185, 185, 249), 1px rgb(214, 217, 252)
+     transitions: 0.3s cubic-bezier(0.25, 1, 0.5, 1); 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+       0.15s linear
+     max-widths: 400px, 100%, 1266px, 817.778px, 343.944px
+     line length: median 54, max 86 characters (390 px: median 38, max 50)
+     buttons: 40px h, radius 4px, border 0px rgb(6, 27, 49), bg rgba(0, 0, 0, 0), 14px/400
+     inputs: 129px h, radius 0px, border 0px rgb(0, 0, 0), bg rgb(255, 255, 255), 16px/300
+     focus: outline 3px solid rgba(84, 82, 251, 0.75) offset 3px; box-shadow none
+     document width at 1024: 1024
+   What makes it feel well made:
+     Precise spacing on an 8 px grid (8, 16, 24, 32, 64 measured), light 300-weight headlines with
+     -0.02 em tracking, a 1266 px grid, 4-8 px radii, and soft, wide shadows (0 16 32 in a
+     desaturated navy at 12 percent). Focus ring 3 px with 3 px offset.
+   What does not suit Clearly:
+     Does not suit: the hero is a large multicolour blurred gradient ribbon and a purple-indigo
+     accent, all on our banned list; 300-weight text is too thin for older eyes; 14 px UI text.
+
+13. Linear
+   Category: High-craft product site
+   Opened:   https://linear.app/
+             on 2026-11-09 at 1440, 1024 and 390 px
+   Acclaim:
+     Chosen for its widely cited craft in typography, spacing and motion. No award verified.
+   Measured (1440 px unless stated):
+     body: "Inter Variable" 16px/24px weight 400 tracking normal
+     paragraph: "Inter Variable" 15px/24px weight 400 tracking -0.165px
+     h1: "Inter Variable" 64px/64px weight 510 tracking -1.408px
+     h1 at 390 px: "Inter Variable" 38px/41.8px weight 510 tracking -0.836px
+     h2: "Inter Variable" 48px/48px weight 510 tracking -1.056px
+     h3: "Inter Variable" 20px/26.6px weight 590 tracking -0.24px
+     families: "Inter Variable", "Berkeley Mono"
+     common sizes: 16px, 12px, 14px, 13px, 13.3333px, 15px, 10px, 18px
+     spacing: 8px, 4px, 6px, 32px, 12px, 10px, 7px, 2px, 24px, 16px, 36px, -4px
+     text colours: rgb(247, 248, 248), rgb(138, 143, 152), rgb(98, 102, 109), rgb(208, 214, 224)
+     backgrounds: rgb(8, 9, 10), rgb(15, 16, 17), rgb(9, 10, 11), rgb(16, 17, 18)
+     radii: 9999px, 50%, 8px, 4px, 12px, 9px
+     shadows: rgba(0, 0, 0, 0.2) 0px 0px 12px 0px inset; rgba(0, 0, 0, 0.2) 0px 0px 0px 1px
+     borders: 1px rgba(255, 255, 255, 0.08), 1px rgba(255, 255, 255, 0.12), 1px rgb(35, 37, 42)
+     transitions: 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94); 0.1s ease; 0.16s cubic-bezier(0.25,
+       0.46, 0.45, 0.94)
+     max-widths: 100%, 1436px, 541.566px, 566.438px, 368px
+     line length: median 55, max 187 characters (390 px: median 48, max 50)
+     buttons: 32px h, radius 9999px, border 0px rgb(138, 143, 152), bg rgba(0, 0, 0, 0), 13px/400
+     inputs: 432px h, radius 0px, border 0px rgba(0, 0, 0, 0), bg rgba(0, 0, 0, 0), 14px/400
+     focus: outline 1px solid rgb(255, 255, 255) offset -2px; box-shadow none
+     document width at 1024: 1024
+   What makes it feel well made:
+     Tight, confident type: Inter Variable at 510-590 weights (between regular and semibold), 64
+     px headings at 1.0 leading and -0.022 em tracking, 15-16 px body at 24 px, near-black layered
+     surfaces (#08090A to #101112), hairline borders at 8-12 percent white, and very short motion
+     (100-160 ms) with a quad ease-out.
+   What does not suit Clearly:
+     Does not suit: dark-by-default, 12-14 px secondary text, dense product screenshots,
+     pill-shaped small buttons (32 px tall, below our 48 px target). Its restraint in motion and
+     its use of in-between weights are the lessons.
+
+
+PATTERNS ACROSS THE REFERENCES
+  Body size. The three accessibility systems all settle on 19 px body text (GOV.UK, NHS.UK) or
+  larger than 16 px. Things and Headspace use 18 px. Product sites (Linear, Stripe, Flighty) sit at
+  15-16 px with smaller secondary text, which our users cannot rely on.
+  Leading. 1.32 (GOV.UK) to 1.47 (NHS.UK, Apple). Our rule is 1.6 for body, which is looser than all
+  of them; it suits 19 px Atkinson Hyperlegible Next, whose large x-height reads as bigger text.
+  Line length. The best-read pages cap paragraphs at 70-76 characters (GOV.UK 71, Things 71,
+  Guardian article 76).
+  Spacing. Every well-made reference uses multiples of 4 or 8 (USWDS, Stripe, NHS.UK, Pudding most
+  clearly). None use odd steps in their main rhythm.
+  Radius. Accessibility systems use 0-4 px; calm consumer products 6-18 px; marketing pages use
+  pills. No well-made reference uses one large radius for everything.
+  Elevation. GOV.UK and NHS.UK use a solid darker bottom edge on buttons instead of blur; Things and
+  Flighty use one or two very faint layered shadows; Stripe's soft wide shadows are the most
+  decorative. Most surfaces are separated by a background tint, not a shadow.
+  Motion. 100-200 ms everywhere except Apple (240-320 ms) and Stripe (up to 800 ms on decorative
+  elements). GOV.UK and NHS.UK have no transitions at all.
+  Focus. The accessibility systems use the thickest, most distinct focus: GOV.UK a 3 px outline
+  plus a 2 px dark underline, NHS.UK 4 px plus a 4 px offset, USWDS 4 px. Product sites mostly leave the browser default (1 px).
+  Targets. NHS.UK primary buttons are 60 px tall and GOV.UK inputs 50 px; most product-site buttons
+  are 32-44 px, below our 48 px minimum.
+
+TOKEN DECISIONS AND THE REFERENCES BEHIND THEM
+  Text family: Atkinson Hyperlegible Next (SIL OFL 1.1), self-hosted, variable 200-800. Designed for
+  the Braille Institute to keep easily confused letters (I l 1, O 0, b d p q) distinct, which serves
+  readers with low vision. One family for headings and text: GOV.UK, NHS.UK and Linear show that one
+  family with clear size and weight steps gives hierarchy without a display face, and it saves a
+  font download. No display family is used. System-font fallback stack in tokens.json.
+  Base size 19 px (default was 18): matches GOV.UK and NHS.UK, the two references written for the
+  widest public. The smallest size token is 18 px, so nothing in the interface goes below the rule.
+  Modular scale: ratio 1.25 (major third) from 19 px, rounded to whole pixels:
+  18 (floor), 19, 24, 30, 37, 46, 58. GOV.UK's 19 to 24 to 36 to 48 steps are close to 1.25-1.33.
+  Font sizes compile to rem so the browser's text-size setting scales them.
+  Line heights: body 1.6 (rule), headings 1.2 (GOV.UK, NHS.UK sit at 1.15-1.3), tight 1.1 for the
+  largest display size only, UI text 1.3.
+  Tracking: headings -0.01 rem, a light touch of the tightening seen on Linear (-0.022 em), Stripe
+  (-0.02 em) and Apple. Body text is never tightened; Atkinson is drawn with open spacing on purpose.
+  Weights: 400, 500, 600, 700. NHS.UK uses 600 for headings and Linear uses in-between weights; we
+  keep 700 for page headings and 600 for labels and table headers.
+  Measure: 38 rem (608 px at 16 px root), about 68-72 characters of 19 px Atkinson. GOV.UK 640 px,
+  Guardian 620 px.
+  Spacing: 8 px base: 8, 16, 24, 32, 48, 64, 96, 128, plus 4 px for icon-to-label gaps only (USWDS,
+  Stripe and NHS.UK all show this half step).
+  Radius: replaced the single 12 px default with roles: control 8 px (buttons, inputs, toggles),
+  surface 12 px (cards, panels), pill only for segmented toggles and the round test button, none
+  for full-bleed bands. Between NHS.UK's 4 px and Things' 6-18 px; avoids the one-radius-everywhere
+  pattern on the banned list.
+  Borders: hairline 1 px for decorative dividers, 2 px for control boundaries (GOV.UK and NHS.UK
+  draw inputs with 2 px borders so they read as fields), 4 px emphasis for selected state or the
+  left rule of an inset notice (GOV.UK inset text).
+  Elevation: two levels only. Raised: 0 1 2 at 8 percent, always with a hairline border (Things,
+  Flighty). Overlay: 0 8 24 at 16 percent, dialogs and popovers only. No glow. A darker bottom edge
+  on buttons (GOV.UK, NHS.UK) will be tried when the button component is built (later milestone);
+  it is a component decision, not a token.
+  Motion: fast 100 ms, base 160 ms, slow 200 ms, nothing longer except the visual
+  Original | Enhanced crossfade at 400 ms. Easing "standard" is cubic-bezier(0.25, 0.46, 0.45, 0.94),
+  the quad ease-out measured on Linear; "inout" is Apple's (0.4, 0, 0.6, 1). No spring or bounce.
+  Reduced motion makes every transition instant.
+  Colour: one primary (#0F5E5A, a deep teal from the starting defaults) plus warm neutrals. The
+  off-white page (#FAFAF7) with white raised surfaces follows the tinted-band separation seen on
+  NHS.UK (#F0F4F5 behind white) and Apple (#F5F5F7). Warm rather than cold greys follow Headspace.
+  Warning was darkened from the default #B45309 to #A44B06 because #B45309 measured 4.39:1 on the
+  sunken surface, below 4.5:1.
+  Ear colours: right ear red (#C0392B light), left ear blue (#1E5AA8 light), the audiology
+  convention, with circle and cross shapes as well. Checked under simulated protanopia,
+  deuteranopia and tritanopia (Machado, Oliveira and Fernandes 2009 matrices, severity 1.0,
+  https://www.inf.ufrgs.br/~oliveira/pubs_files/CVD_Simulation/CVD_Simulation.html, opened
+  2026-11-09): the smallest CIE76 difference is 55 (dark theme, protanopia), far above the 20 we
+  require.
+  Focus ring: 3 px solid, 2 px offset, so the ring sits against the page colour rather than the
+  control. Light theme uses near-black (#1B1B1A, 16.5:1 on the page); dark theme uses a warm yellow
+  (#FFD54A, 13.1:1), chosen because a warm yellow stands apart from every other colour in the
+  dark palette; high contrast uses black.
+  Targets: minimum 48 px, input height 56 px (between GOV.UK 50 px and NHS.UK's 60 px buttons), test
+  button 160 px.
+  Breakpoints: tablet 768, desktop 1024 (fixed by the navigation spec), wide 1280. Content width
+  1120 px, gutters 16 px on phones and 32 px from tablet up.
+  Themes: light (default), dark (system dark scheme), high contrast (in-app switch or the system's
+  increased-contrast setting): pure black on white, black control borders, darker semantic colours.
+
+SOURCES FOR THE MATHS
+  WCAG 2.2 relative luminance (sRGB threshold 0.04045) and contrast ratio:
+  https://www.w3.org/TR/WCAG22/#dfn-relative-luminance and #dfn-contrast-ratio, opened 2026-11-09.
+  Design Tokens Format Module 2025.10 (stable), https://www.designtokens.org/tr/2025.10/format/,
+  opened 2026-11-09.
+
+
+DESIGN REVIEW 1 (M03, 2026-11-09): /check screens
+Captured with scripts/review/capture.ts and scripts/review/flow.ts at 1440, 1024 and 390 px, light
+and dark (research/review/m03-before and m03-after, not committed). Critiqued against RULES.md and
+this file as an outside designer would.
+
+  Problem (before)                                       Change (after)
+  Stage: the "I hear it" button was 160 px on desktop    Button is 1.25x the test-button token on
+    and wrapped its label onto two lines; for a test       desktop and 1.4x on phones, label never
+    built around one action it looked timid.               wraps, text one step larger.
+  Stage: the ear indicator sat top-left while the        Centred above the button, so the eye
+    button and status were centred; the eye had to         drops straight down: ear, button,
+    jump.                                                  status, progress.
+  Live and results charts: the SVG scaled down with      The chart's coordinate system follows its
+    its column, so 16-unit axis text rendered at about     rendered width (one unit per CSS pixel);
+    10 px in the side column and on phones.                labels stay at 16 px; 3k and 6k ticks are
+                                                           dropped on narrow charts to avoid overlap.
+  Results: five buttons of equal weight in a ragged      One primary (Hear the difference now), one
+    stack; no single next action.                          secondary (Fine-tune), then Retake, Save
+                                                           PDF and Share as quiet links under a rule.
+  /check: the headphones field sat above the two         Removed from /check (it is on the
+    choices and competed with them; Quick start does       pre-check, where it matters).
+    not need it.
+  390 px header: the nav wrapped onto two rows.          Brand above one nav row with tighter
+                                                           padding; no wrapping at 390 px.
+  Quiet buttons were indented by their padding and       Quiet variant has no horizontal padding.
+    misaligned with text above them.
+  Kept: the asymmetric 3:2 grid on /check and the stage (main task left, supporting controls and
+  the chart right); the deep-teal primary with warm neutrals; numbered pre-check items.
+  Open for M10: on phones the results action sits below the chart; consider moving the sentence
+  and primary action above it.
+
+DESIGN REVIEW 2 (M05, 2026-11-09): Clear Audio (/audio and the player)
+Captured with scripts/review/player.ts at 1440, 1024 and 390 px, light and dark
+(research/review/m05-before, m05-after).
+
+  Problem (before)                                       Change (after)
+  Start screen: three identical cards in three           The file card leads: two-thirds width,
+    columns, the template look RULES.md bans.              dashed drop area, a file-and-wave line
+                                                           illustration, larger heading. Demo and
+                                                           tab are smaller cards in the third column.
+  Player at 390 px: media and transport came first;      The controls column is first on phones;
+    Original | Enhanced, the main control, was below       Original | Enhanced fills the width as two
+    the fold, and it wrapped "Enhanced" onto a second      equal halves.
+    row.
+  Presets as one segmented pill wrapped "Music" onto a   Presets are separate chips that wrap
+    second row inside the pill.                            cleanly.
+  The quiet "Choose another source" link was indented    Button padding moved into the primary and
+    (px-3 and px-0 both applied).                          secondary variants; quiet links align.
+  The buffered bar used the control border colour and    Uses the hairline border colour.
+    read as a heavy divider.
+  Kept: the 3:2 grid, the token-drawn level display, one primary colour.
+  Open for M10: the transport's three buttons wrap at 390 px; consider icons with text labels.
+
+DESIGN REVIEW 3 (M10, 2026-11-10): full review
+Screens: Home (new and returning), Hearing Check pre-check, Clear Audio start and player, Quiet
+Lab, Calm Sounds, Listening Health, Settings, first run; at 1440, 1024 and 390 px, light and
+dark (e2e/review/screens.spec.ts, DESIGN_SHOTS=1; 60 screenshots in test-results/design-review).
+Stage and results were reviewed in review 1 and are unchanged apart from the navigation.
+Critique and fixes (before -> after):
+1. Hierarchy, Home: the h1 repeated the wordmark ("Clearly") and the main action was a normal
+   button the same size as the suggestion's -> h1 "Your sound is ready"; "Start Clear Audio" is
+   a full-width (phone) / wide, 64 px tall, 2xl button. Found while fixing it: a caller's size
+   classes on Button lost to the base classes (Tailwind cannot order utilities), so buttonClass
+   now drops a default when the caller passes the same group (text size, padding, height).
+2. Grid at 1024: Clear Audio's two columns plus the sidebar squeezed "Original | Enhanced" into
+   broken words ("Ori-gin-al") and the enhancement cards into tall slivers; Home's button
+   wrapped -> two-column layouts start at the wide breakpoint (1280); below it the control
+   column comes first, full width, and enhancement cards are one column at 1024 (two at tablet
+   and wide).
+3. Type contrast in the enhancement cards: three cards titled by an h3 (text-xl) and three by a
+   switch label (base) looked like two systems -> Switch gained a title size used for Background
+   cleanup, Night mode and Voice focus; every card title is now xl semibold.
+4. Rhythm: "Hear an example"'s note sat a status-line's height below its link -> the note sits
+   directly under the link and the status line follows.
+5. Sidebar: More's children wrapped with uneven gaps -> tighter, consistent 48 px rows with
+   leading-tight so two-line labels read as one item. (A wider sidebar was tried and reverted:
+   it cost the content column too much at 1024.)
+6. Settings, Profiles: "Headphones: X" and "Not calibrated..." ran together without a full stop
+   -> two lines.
+7. The token theme had no 0 spacing step, so every "-0" utility was silently missing (fixed in
+   tokens; see DECISIONS M10). This changes a few margins that were meant to be zero.
+Checked and kept: one primary colour; neutral surfaces; no gradients, glows or glass; icon set
+matches the 2 px illustration strokes; Quiet Lab is a list of horizontal cards with different
+diagrams, not three identical icon-topped cards; copy tone plain and specific. Dark theme reads
+well; the Estimated badge keeps its outline in both themes.
+Not fixed (noted): full-page screenshots on phones show the fixed tab bar mid-page; that is a
+capture artefact, not a layout bug. The audiogram on Home at 390 px is small but has its table.
+
+DESIGN REVIEW 4 (M14 final, 2026-11-10)
+Method: the M10 screenshot set (e2e/review/screens.spec.ts, DESIGN_SHOTS=1) with the new screens
+added: Get Clearly Everywhere (phone page) and the virtual cable wizard, at 1440, 1024 and 390 px
+in light and dark; the video export dialog and the desktop app checked in their own tests.
+Findings and fixes:
+- Phone page, 390 px: the illustration beside the steps squeezed them into a narrow column and the
+  headings wrapped. Fix: illustration above the steps on phones, beside them from tablet up.
+- Phone page: the Android illustration showed two menu dots while the step says three. Fixed.
+- Desktop card: "The download link appears here when it is published" was numbered as step 1.
+  It is a note, now above the numbered steps.
+- Cable wizard: one obvious action at each point (the four steps, then Show my audio devices,
+  then Start); errors (same device, no cable, test failed) are plain sentences next to the
+  controls. No change.
+- Full-page screenshots at 390 px show the fixed tab bar part-way down the page; that is how
+  full-page capture draws fixed elements, not what a person sees (as in review 3).
+Checked again by tests: axe on every route in light, dark and high contrast and at 200 percent
+text (now including /audio/cable and the new phone page), Lighthouse targets unchanged.

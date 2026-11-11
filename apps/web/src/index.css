@@ -1,0 +1,87 @@
+/* Tailwind without its default theme: only token-driven utilities exist. */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import './design/generated/theme.css';
+@import './design/generated/tokens.css';
+@import '@fontsource-variable/atkinson-hyperlegible-next/wght.css';
+
+/* Tailwind v4 has no theme namespace for border widths, so the border tokens become utilities. */
+@utility border-hairline {
+  border-style: solid;
+  border-width: var(--t-border-hairline);
+}
+@utility border-control {
+  border-style: solid;
+  border-width: var(--t-border-control);
+}
+@utility border-emphasis {
+  border-style: solid;
+  border-width: var(--t-border-emphasis);
+}
+
+@layer base {
+  html {
+    font-family: var(--t-font-family-text);
+    font-size: 100%;
+    background: var(--t-color-surface);
+    color: var(--t-color-text);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-size: var(--t-font-size-base);
+    line-height: var(--t-font-line-height-body);
+    letter-spacing: var(--t-font-tracking-body);
+    min-height: 100dvh;
+    /* At 200 percent text size a single large word can be wider than a phone; let it break. */
+    overflow-wrap: break-word;
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: var(--t-font-line-height-heading);
+    letter-spacing: var(--t-font-tracking-heading);
+    font-weight: var(--t-font-weight-bold);
+    text-wrap: balance;
+  }
+
+  p {
+    max-width: var(--t-measure-text);
+    text-wrap: pretty;
+  }
+
+  /* Long file names and values must wrap rather than widen the page at 200 percent text size. */
+  code {
+    overflow-wrap: anywhere;
+  }
+
+  a {
+    color: var(--t-color-primary);
+    text-decoration-line: underline;
+    text-decoration-thickness: var(--t-border-hairline);
+    text-underline-offset: 0.2em;
+  }
+
+  a:hover {
+    color: var(--t-color-primary-hover);
+    text-decoration-thickness: var(--t-border-control);
+  }
+
+  :focus-visible {
+    outline: var(--t-focus-width) solid var(--t-color-focus);
+    outline-offset: var(--t-focus-offset);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: var(--t-motion-duration-instant) !important;
+      animation-duration: var(--t-motion-duration-instant) !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

@@ -1,0 +1,67 @@
+CLEARLY: PHONES AND TABLETS (M14)
+
+FOR PEOPLE (the phone page, More > Get Clearly Everywhere)
+  Open Clearly in the phone's browser and add it to the Home Screen; it then opens like an app and
+  works offline except for downloads and backup.
+  iPhone and iPad: open the address in Safari, tap Share, tap Add to Home Screen, open Clearly
+  from the Home Screen, run Quick start.
+  Android: open the address in Chrome, tap the menu (three dots), tap Install app or Add to Home
+  screen, open Clearly, run Quick start.
+  Menu names vary between versions.
+  The page shows a QR code for the address (generated on the device with the qrcode library from
+  VITE_PUBLIC_URL at build time, or the page's own address).
+
+What works on a phone:
+  Hearing Check                          yes (larger test button, wake lock, vibration)
+  Clear Audio with files and the demo    yes
+  Calm Sounds                            yes; on some phones it pauses when the screen locks
+  Captions on files                      yes, after a download on Wi-Fi
+  Hum Filter on files                    yes
+  Auto Boost                             yes while something plays, with headphones
+  Browser tab sound                      no: phone browsers cannot listen to sound from other
+                                         apps such as Netflix or YouTube
+  Workaround: use Clearly on a computer, or open a video file you own in Clearly on the phone.
+  Phones' own settings (names checked 2026-11-10 against Apple and Google support pages):
+    iPhone: Settings > Accessibility > Audio & Visual > Headphone Accommodations.
+    Android: Settings > Accessibility > Sound Amplifier (Pixel and some other phones), or the
+    phone maker's hearing options.
+
+WHAT THE APP DOES DIFFERENTLY ON A PHONE (by capability, never by browser name)
+  "Phone" means a coarse primary pointer with no fine pointer (tab capture, layout); export limits
+  also treat 2 GB of memory or less as a phone.
+  - Bottom tab bar, padded by the safe-area insets (env(safe-area-inset-*)).
+  - The Hearing Check button is 1.4 times the 160 px token (1.25 times on desktop).
+  - Wake lock during the Hearing Check; vibration on each tap where navigator.vibrate exists.
+  - File picker accepts audio/* and video/*.
+  - Media Session metadata and controls while Clear Audio plays.
+  - Downloads (captions, Background cleanup, the video tool) ask first on a cellular or
+    data-saver connection (navigator.connection type or saveData).
+  - Export: audio up to 30 minutes; no video export (it needs more memory than a phone allows).
+  - Captions default to Standard (the smaller model).
+  - Silent switch: navigator.audioSession type "playback" where it exists (feature-detected);
+    otherwise a silent looping media element started from the first tap; otherwise nothing.
+  Verified on emulated phones (e2e/app/phone.spec.ts, e2e/app/video.spec.ts): tab bar and
+  safe-area padding, the larger button, the picker's accept list, Media Session metadata, the
+  cellular confirmation, Standard captions, no video export.
+
+CALM SOUNDS AND THE LOCK SCREEN
+  Built in M14: where Media Session exists, Calm Sounds plays graph -> MediaStreamAudioDestination
+  Node -> a hidden <audio> element, with lock-screen metadata (title, "Clearly", "Calm Sounds")
+  and pause/stop actions that stop the sound. The volume cap and Safety limiter stay inside the
+  graph. Phones are more willing to keep a media element playing in the background than an
+  AudioContext's own output.
+  VERIFIED RESULT: NOT YET TESTED ON A REAL DEVICE. No iPhone or Android device was available. The
+  Calm Sounds card therefore still says sound may pause when the screen locks and to keep the
+  screen on; change it only after the steps in MANUAL_TESTS (M14, items 1 and 2) pass, and record
+  the result here with the device, OS and browser versions.
+
+FOR DEVELOPERS
+  HTTPS: microphone access (Auto Boost) and service workers need a secure context; localhost is
+  treated as secure, a phone on the LAN at http://192.168.x.x is not. To test on a phone, use an
+  HTTPS tunnel to the dev server (for example "cloudflared tunnel --url http://localhost:5173" or
+  an equivalent) and set VITE_PUBLIC_URL to the tunnel address so the QR code points there.
+  Known platform limits: no tab or system audio capture on any phone browser; iOS Safari has no
+  WebGPU by default (captions run on WebAssembly), no File System Access save picker (exports
+  download instead), no Document Picture-in-Picture (no floating captions), no setSinkId (no
+  output device choice). Storage may be cleared under pressure unless persistent storage is
+  granted.

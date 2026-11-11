@@ -1,0 +1,22 @@
+{
+  "name": "@clearly/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure TypeScript domain logic: hearing maths, profiles, schemas. No DOM or Web Audio.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts",
+    "./desktop": "./src/desktop/ipc.ts",
+    "./desktop-events": "./src/desktop/events.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.scripts.json",
+    "test": "vitest run --root ../.. --project core",
+    "sim": "node scripts/simulate.ts",
+    "tune": "node scripts/tune.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  }
+}

@@ -1,0 +1,96 @@
+CLEARLY: PRIVACY
+What Clearly stores, why, where, for how long, and how to delete it. Matches the server code in
+apps/server (M04). The in-app page /more/privacy says the same in plain words. A qualified privacy
+professional must review this file and the in-app wording before launch (REGULATORY_REVIEW.txt).
+
+1. AUDIO
+All sound processing happens on the person's device. No audio, recording or transcript is ever
+sent anywhere. The server has no endpoint that accepts audio.
+
+2. ON THE DEVICE (always, with no account and no network)
+Stored in the browser's IndexedDB database "clearly" (and, in the desktop app, the app's own
+data folder):
+  profiles        name, headphone name, audiogram (hearing results), calibration level, sound
+                  settings, matched ringing pitch
+  hearingChecks   every Hearing Check result with its method, reliability and headphone name
+  sinChecks       speech-in-noise results (M08)
+  exposureDays    minutes per day in each listening zone (M08); never audio
+  captionCache    caption text for files the person opened, keyed by a file hash (M07)
+  kv              app settings and small flags (active profile, reminders, backup state)
+  checkProgress   a paused Refine check, deleted after 24 hours
+It stays until the person deletes it (Settings, or by clearing site data). Browsers may clear it
+under storage pressure unless persistent storage is granted; Clearly asks once after the first
+Hearing Check and offers backup files.
+
+3. BACKUP FILES AND PROFILE LINKS
+"Back up my data" saves a JSON file to wherever the person chooses. "Share my profile link" puts
+one profile into the address after "#", which browsers never send to a server; the receiving page
+removes it from the address bar after reading it. Both contain hearing results: the app warns
+before making a link.
+
+4. ON THE SERVER (only if the person turns on "Back up and move to another device")
+Purpose: let the person restore their settings on another device. Off by default; turning it on
+needs an explicit consent checkbox. Lawful basis to be confirmed by the privacy review (explicit
+consent, GDPR Article 9(2)(a), is the intent, since audiograms are health data).
+
+What is stored (SQLite, apps/server/src/db.ts):
+  profiles         the backup document (profiles, Hearing Check history, settings; listening
+                   history and captions only if "Include listening history" is on), encrypted;
+                   version number; consent version; created, updated and last-accessed times
+  tokens           SHA-256 hashes of device tokens (one per device), with creation time
+  restore_codes    HMAC-SHA-256 of each restore code with a server secret, and its expiry
+  feedback         feedback text and app version, with the time it was sent
+What is never stored: audio, names, email addresses, IP addresses, user agents, request headers.
+
+Encryption at rest: AES-256-GCM, a fresh 96-bit IV per write, the 128-bit tag checked on read.
+The key comes from PAYLOAD_ENCRYPTION_KEY ("<keyId>:<base64 32 bytes>"); each row records its key
+id. Key rotation: set a new PAYLOAD_ENCRYPTION_KEY with a new id and move the old one into
+PAYLOAD_ENCRYPTION_KEYS_OLD. New writes use the new key; old rows stay readable and are
+re-encrypted with the new key the next time the person's device saves. When no row uses an old
+key id any more (SELECT DISTINCT key_id FROM profiles), remove it from PAYLOAD_ENCRYPTION_KEYS_OLD.
+
+Tokens are 256 random bits; restore codes are 60 bits (12 Crockford characters), valid for 24
+hours and one use, deleted when redeemed, and purged hourly when expired. Codes are stored as an
+HMAC with RESTORE_CODE_PEPPER, because 60 bits is too few to resist guessing against a plain hash
+if the database leaked.
+
+IP addresses: used only in memory, for rate limits (60 requests a minute per client, 5 a minute
+on restore) and a 15-minute cooldown after 5 failed restore attempts. They are never written to the
+database or the logs. Behind a reverse proxy, TRUST_PROXY (a hop count or a list of addresses or
+CIDRs; off by default) tells the server which forwarded address is the client's, so limits apply
+per person rather than to the proxy. Logs (pino) record method, route, status and timing only;
+headers, addresses and bodies are not logged (a test checks this).
+
+Retention: a backup not accessed for PROFILE_RETENTION_DAYS (default 540 days, about 18 months)
+is deleted by a daily job, with its tokens and codes. The app shows this period in the backup card
+and the privacy page (it reads it from /api/health).
+
+Deletion: "Delete cloud backup" in Settings deletes the row, every token and every code at once
+(hard delete). Local data on the device is not touched. "Sign out other devices" replaces every
+token with a new one for this device.
+
+Where: on the server the operator runs (see Dockerfile). The database file is in DATABASE_PATH;
+its backups are the operator's responsibility (RELEASE_CHECKLIST.txt).
+
+5. NETWORK REQUESTS
+No analytics, telemetry or trackers. The app talks only to its own origin: the optional API above,
+and downloads the person starts (captions models, Background cleanup, the video tool) from
+/heavy/ on the same origin, each checked against its SHA-256. The server's Content-Security-Policy
+allows connections to its own origin and to blob: URLs (the video tool reads its own verified
+copy from one; blob: URLs are local to the page and never leave the device). An end-to-end test
+asserts that the main flows make no request to any other host.
+
+6. MICROPHONE
+Used only when the person turns on Auto Boost (to measure how noisy the room is) or sets up the
+virtual cable in the desktop app (to list devices and listen to the chosen cable). Clearly asks
+with its own explanation before the browser's prompt. Nothing from the microphone is recorded,
+stored or sent; Auto Boost keeps only a running level.
+
+7. DESKTOP APP (M12)
+Everything above applies. In addition, the desktop app writes profile-backup.json (the same
+content as a backup file, including Hearing Check history) into its own user-data folder after
+every change, so the person always has a local copy; "Show backup folder" in Settings opens it,
+and uninstalling the app or deleting that folder removes it. The desktop app contacts only the
+server it was built for (CLEARLY_SERVER_URL), for the same optional backup and for heavy
+downloads; links the person clicks open in their own browser. It has no auto-update and checks
+nothing in the background.

@@ -1,0 +1,32 @@
+{
+  "name": "@clearly/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Optional Fastify 5 API.",
+  "exports": {
+    ".": "./src/app.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "dev": "node --env-file-if-exists=.env --watch src/main.ts",
+    "start": "node --env-file-if-exists=.env dist/server.js",
+    "build": "vite build --config vite.config.ts",
+    "test": "vitest run --root ../.. --project server"
+  },
+  "dependencies": {
+    "@clearly/core": "workspace:*",
+    "@fastify/cors": "11.3.1",
+    "@fastify/helmet": "13.2.0",
+    "@fastify/rate-limit": "11.2.1",
+    "@fastify/static": "10.1.7",
+    "better-sqlite3": "13.0.3",
+    "fastify": "5.12.7",
+    "fastify-type-provider-zod": "7.0.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.13",
+    "vite": "8.3.7"
+  }
+}

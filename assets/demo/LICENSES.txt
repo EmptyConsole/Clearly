@@ -1,0 +1,12 @@
+CLEARLY: DEMO AUDIO LICENCES
+
+M03 demo clip ("Hear the difference", /audio)
+  What: a speech-like test sound made by formant synthesis (two alternating synthetic voices with
+        consonant-like noise bursts, over a quiet pink-noise bed). It contains no words.
+  Source: generated at run time by packages/audio/src/demo/syntheticSpeech.ts. No file is stored
+        and no third-party recording, voice or sample is used.
+  Licence: written for Clearly; the generated audio is dedicated to the public domain (CC0 1.0).
+
+M05 bundled demo clip (60 seconds, two people talking over background sound)
+  Not created yet. It needs a permissively licensed TTS voice and a CC0 ambience bed; see
+  docs/STATUS.txt (open question for the owner).

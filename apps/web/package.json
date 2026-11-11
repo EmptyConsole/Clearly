@@ -1,0 +1,53 @@
+{
+  "name": "@clearly/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Clearly web app and PWA (primary target).",
+  "scripts": {
+    "tokens": "node scripts/build-tokens.ts",
+    "dev": "node scripts/build-tokens.ts && vite",
+    "build": "node scripts/build-tokens.ts && tsc -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "node scripts/build-tokens.ts && tsc -p tsconfig.json && tsc -p tsconfig.node.json",
+    "check:tokens": "node scripts/check-tokens.ts"
+  },
+  "dependencies": {
+    "@clearly/audio": "workspace:*",
+    "@clearly/core": "workspace:*",
+    "@ffmpeg/ffmpeg": "0.12.15",
+    "@fontsource-variable/atkinson-hyperlegible-next": "5.3.0",
+    "@fontsource/atkinson-hyperlegible-next": "5.3.0",
+    "@huggingface/transformers": "4.3.1",
+    "@pdf-lib/fontkit": "1.1.1",
+    "@radix-ui/react-checkbox": "1.4.1",
+    "@radix-ui/react-dialog": "1.3.1",
+    "@radix-ui/react-popover": "1.3.1",
+    "@radix-ui/react-switch": "1.4.1",
+    "dexie": "4.4.7",
+    "fflate": "0.8.3",
+    "pdf-lib": "1.17.1",
+    "qrcode": "1.5.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.30.6",
+    "workbox-window": "7.4.1",
+    "zod": "4.6.7",
+    "zustand": "5.0.16"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.5",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.8",
+    "@types/qrcode": "1.5.6",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "6.3.0",
+    "fake-indexeddb": "6.2.6",
+    "jsdom": "31.0.0",
+    "mediabunny": "1.62.1",
+    "tailwindcss": "4.3.5",
+    "vite": "8.3.7",
+    "vite-plugin-pwa": "2.0.0"
+  }
+}

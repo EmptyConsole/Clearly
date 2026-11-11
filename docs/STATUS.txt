@@ -1,0 +1,601 @@
+CLEARLY: STATUS
+Project memory. Updated at the end of every session. Last updated 2026-11-10 (M14, final).
+
+MILESTONES
+  M00  Scaffold, tooling, CI, design research and tokens     done (2026-11-09)
+  M01  packages/core: threshold estimator and accuracy tests  done except one target the owner
+                                                              must rule on (2026-11-09)
+  M02  packages/audio: graph, limiter, tones, offline renderer, done (2026-11-09)
+       encoders, safety tests
+  M03  Hearing Check UI: Starter, calibration, Express, results, done (2026-11-09)
+       Refine, PDF
+  M04  Storage, profiles, Settings, backup, server, restore      done (2026-11-09)
+       codes, sync
+  M05  Clear Audio: sources, player, presets, Voice focus,       done (2026-11-09;
+       meters, WAV and MP3 export                                demo clip still synthetic, Q10)
+  M06  Night mode and Background cleanup                         done (2026-11-09)
+  M07  Captions: Whisper worker, floating window, SRT and VTT     done (2026-11-09)
+  M08  Listening Health: speech in noise, tracker, history       done except the digit recordings
+                                                                (Q10)
+  M09  Quiet Lab: Hum Filter, Auto Boost, Calm Sounds           done (2026-11-09)
+  M10  Navigation, first run, Home, accessibility, PWA,      done (2026-11-10;
+       design review 3, ship check                            Docker not built here)
+  M11  Video export with ffmpeg.wasm (own LGPL core)           done (2026-11-10)
+  M12  Desktop app (Electron)                                  done (2026-11-10;
+                                                                Windows and Linux capture untested)
+  M14  Phones, phone page, final docs, hardening              done (2026-11-10; extension parts
+                                                                skipped: M13 dropped)
+  The combined M03-M14 prompt has been worked through in order. Its milestone titles:
+  M04 storage, profiles, Settings, backup, server, restore codes, sync; M05 Clear Audio player
+  and export; M06 Night mode and Background cleanup; M07 Captions; M08 Listening Health; M09 Quiet
+  Lab; M10 onboarding, navigation, Home, accessibility, PWA, full design review; M11 video export;
+  M12 desktop app; M14 phone page, docs and hardening. (M13 was dropped by the owner on
+  2026-11-10; M14 follows M12.)
+
+M03 CHECKLIST (each numbered section of the M03 prompt)
+  [x] 1 Foundations: lazy routes on final paths, PlatformAdapter + WebPlatformAdapter + context,
+        AudioEngine (gesture, resume, audioSession then silent element, Zustand state), Dexie
+        (profiles, hearingChecks, kv, checkProgress; zod + migrate on every read), copy file,
+        tokens only, shared components on /design, headphones text input saved on the profile.
+  [x] 2 Starter profile (Estimated, Gentle, 12 dB cap), "Hear the difference now" to a demo-clip
+        page with Original | Enhanced, "Make it more accurate (about N seconds)".
+  [x] 3 Pre-check screen (three items, accuracy sentence, required checkbox, age or Skip, 70+ turns
+        Slower pace on); strings in REGULATORY_REVIEW.txt.
+  [x] 4 Calibration (reason, ramp, too-quick retry, volume message at -12 dBFS, Lc stored with
+        headphone name and date).
+  [x] 5 Stage (160 px+ button, ear by shape and word, one progress bar, aria-live status,
+        pointerdown/click-anywhere/Space/Enter, no auto-repeat, vibrate, audio-clock timing with
+        early advance, Slower pace switch, wake lock, Escape/Pause and Resume, live SVG audiogram
+        with table), Refine (16 tracks seeded from Express, pause and finish later for 24 h).
+  [x] 6 Results (audiogram + table, shape sentence, 1 kHz sentence, reliability badge, Low keeps
+        the previous profile, referral card, actions, PDF with vectors and self-hosted font,
+        Share or download, saved to hearingChecks, persistent storage requested once).
+  [x] 7 Tests: component tests (Starter, calibration x3, full Express, Low path, referral, Refine
+        pause/resume and 24 h expiry, keyboard-only), Playwright (Starter + demo, Express + PDF
+        download, axe on every new route), components on /design.
+  [x] 8 Checks pass including the size gate; design review 1 done and logged.
+
+M14 CHECKLIST
+  [x] 1 Phones: earlier phone behaviour verified on emulated phones (e2e/app/phone.spec.ts: tab
+        bar with safe-area padding, larger test button, accept list, Media Session, cellular
+        confirmation, Standard captions; video.spec: no video export on phones); real-device
+        checks listed (MANUAL_TESTS M14). Calm Sounds routed through a media element with Media
+        Session metadata; NOT verified on a real phone, so the card still says it may pause.
+  [x] 2 Phone page: QR code (qrcode 1.5.4) from VITE_PUBLIC_URL, localhost note, iPhone and
+        Android steps with inline illustrations, what works on a phone, the workaround line, the
+        phone's own settings (names checked), the desktop card with real install steps (the
+        download link waits for open question 21). Extension page: none (M13 dropped).
+  [x] 3 Docs: MOBILE.txt, HEARING_MATH.txt (M02, M06, M09 added and checked against the code),
+        PRIVACY.txt (final: microphone, desktop app, network), DESKTOP.txt, SUPPORT_MATRIX.txt
+        (from runs only), REGULATORY_REVIEW.txt (launch-market header; M10 to M14 strings; claims
+        outside the screens), RELEASE_CHECKLIST.txt. README.md untouched. No EXTENSION.txt.
+  [x] 4 Hardening: full suite green three times in a row with no retries (each run: chromium +
+        desktop 70 passed, audio 68 passed; 25 opt-in skipped); WebKit core flows 5 passed;
+        Firefox could not start here (macOS 27) and runs in CI on Linux; fault injection
+        (faults.spec: heavy 404 and corrupt, Cache API and IndexedDB quota, system suspension
+        banner, headphones unplugged) all pass, with two new app behaviours built for them;
+        security pass: audit explained (DECISIONS), CSP verified on the production server and in
+        the desktop app, no third-party requests (requests.spec), secrets and size guards green
+        over every file; perf: worklets re-measured by the audio run (docs/perf.txt), entry chunk
+        96.6 KB gzipped (limit 250); design review 4 logged.
+  [~] 5 Done, except: "commit and tag v1.0.0-rc1" is left to the owner (Claude does not commit),
+        and the human release items below.
+
+M14 SUMMARY
+  Unit tests 435 + 1 expected failure. Playwright: chromium + desktop 70, audio 68 (three clean
+  runs in a row), WebKit 5.
+  Bugs found and fixed in M14: a system-suspended AudioContext stopped the sound with no message;
+  unplugging headphones moved the sound to the speakers at the same level; Safari and Firefox were
+  offered a tab picker that cannot share tab sound; two test races (graph not ready, shared
+  results folder when runs overlapped).
+  Deployment: the web app is set up for Vercel (apps/web/vercel.json, .env.vercel, DECISIONS);
+  a clean-copy simulation of Vercel's install and build passed without Emscripten, downloading
+  the video tool from the owner's GitHub release (checksums match).
+
+ADDED AFTER M14 (owner request, 2026-11-10)
+  Hearing Check with computer speakers: a "What will you listen with?" choice on the pre-check.
+  Speakers test both ears together (one set of tracks, tones in both channels, the result copied
+  to both ears), take about half the time, and say so on the results and the PDF. Tested: core
+  unit tests, an offline tone test (both channels identical at the calibrated peak), and a full
+  Express run in Playwright. Real speakers are a manual test (MANUAL_TESTS).
+
+KNOWN LIMITATIONS (honest list)
+  - Hearing Check: open questions 1 and 2 (guess-rate rating; Express can miss a band far above
+    the prior). EQ overlap (question 3) and Enhanced louder than Original (question 7).
+  - The demo clip and the speech-in-noise digits are synthetic until a licensed voice is chosen
+    (question 10).
+  - Phones: Calm Sounds on a locked screen, wake lock, vibration and the silent switch are not
+    verified on real devices.
+  - Desktop: system sound only on Windows (not tested on Windows hardware); macOS and Linux use
+    the virtual cable (real cables not tested); builds are unsigned; Windows and Linux installers
+    not built here.
+  - Firefox not tested on this machine. Edge not tested separately.
+  - On Vercel: no backup, restore codes or sync (the API needs a host with a disk).
+  - A dialog's scroll lock is blocked by the CSP (question 23).
+  - Docker image unbuilt (question 20).
+  - Hearing Check through speakers cannot show differences between the ears, and the room adds to
+    the result (the screens say so).
+
+NEEDS A HUMAN BEFORE RELEASE (from RELEASE_CHECKLIST.txt)
+  Regulatory review per launch market; privacy review and lawful basis; licences (TTS voice
+  still to choose); signing certificates if wanted; server secrets and variables; desktop and
+  web build variables; database backups; every manual test on real devices; CI green with
+  Firefox; commit and tag v1.0.0-rc1.
+
+M12 CHECKLIST
+  [x] 1 Shell and security: clearly://app privileged before ready, protocol.handle with SPA
+        fallback, traversal checks and MIME types (unit-tested); contextIsolation, sandbox, no
+        nodeIntegration, webSecurity (checked in the smoke test); strict CSP with connect-src
+        limited to the server; navigation and window.open blocked, https links to the default
+        browser; permissions only media (no camera) and display-capture, only for the app; fuses
+        (RunAsNode, NODE_OPTIONS, inspect off; cookie encryption, OnlyLoadAppFromAsar on; file://
+        privileges off) verified on a packaged build; NSMicrophoneUsageDescription; Screen Recording
+        documented.
+  [x] 2 Preload bridge: one bundled CJS file, window.clearlyDesktop with the allowlisted channels
+        (+ setGlobalShortcut, see DECISIONS), zod on both sides (schemas in packages/core), sender
+        frame checked; DesktopPlatformAdapter, detected only by window.clearlyDesktop in
+        platform/detect.ts.
+  [x] 3 Capture: system sound via setDisplayMediaRequestHandler + 'loopback' where documented
+        (Windows); macOS tested here and recorded (not supported); loopbackWithMute off until a
+        Windows test; doubled-sound warning points to the cable. Virtual cable wizard: label
+        detection, microphone pre-prompt, four steps, raw getUserMedia, setSinkId output,
+        same-device refusal, tone routing test. File and demo use native dialogs via the adapter.
+  [x] 4 Tray, global shortcut (configurable, failures shown, can be turned off), floating
+        captions window (frameless, on top, resizable, transparent, per-display position,
+        aria-live, Escape), automatic backup (debounced, atomic) with Show backup folder, single
+        instance, window state, Edit menu roles, build-time server URL, About with version and
+        download page.
+  [x] 5 Packaging and CI: electron-builder NSIS x64, dmg universal, AppImage x64 with icons;
+        .github/workflows/desktop.yml on matching runners; docs/DESKTOP.txt with unsigned
+        first-launch steps. Only an unpacked macOS arm64 build was made here.
+  [x] 6 Tests: Playwright Electron smoke test (launch, preferences, bridge rejects invalid
+        payloads, Quick start, a file plays (analyser), Original | Enhanced, tray command);
+        unit tests (protocol handler, MIME, ranges, IPC schemas, cable labels, same device,
+        security rules, window state, atomic files); MANUAL_TESTS M12 section.
+  [x] 7 Checks pass; per-OS capture recorded in DECISIONS.
+
+M12 SUMMARY
+  Unit tests 428 + 1 expected failure. Playwright: desktop 4 passed; chromium 51 passed (21
+  opt-in skipped, 2 workers); axe now also covers /audio/cable.
+  Bugs found and fixed: clearly: URLs have origin "null" in Node (would have denied all IPC);
+  session handlers before app.ready; the Cache API refuses clearly:// keys (heavy downloads would
+  never count as done on desktop); and an M11 bug: the production CSP blocked the video tool
+  (script-src and connect-src now allow blob:), found by exporting through apps/server.
+  M13 was dropped by the owner; nothing of it remains.
+
+M11 CHECKLIST
+  [x] 1 ffmpeg.wasm setup: @ffmpeg/ffmpeg 0.12.15 (MIT, pinned) with Clearly's own single-thread
+        core, built LGPL-2.1-or-later from FFmpeg 5.1.10 (scripts/ffmpeg-wasm/build.sh, pnpm
+        build:ffmpeg; refuses any non-LGPL configuration; checks every requested component;
+        rebuild is byte-identical). Core JS and wasm in heavy-manifest.json (new "build" entry
+        type, SHA-256 verified), served from /heavy/ffmpeg/; licence in DECISIONS and
+        assets/LICENSES.txt; complete source offered at /heavy/ffmpeg/source/ and linked from the
+        download step (LGPL 6(d)). Loading: dynamic import in @ffmpeg/ffmpeg's own module worker;
+        real size (4.5 MB), tap, metered confirmation, progress, Cache API; failure offers
+        audio-only. Input read with WORKERFS (no copy); findings in DECISIONS.
+  [x] 2 Pipeline: M02 renderer to a temporary WAV in OPFS (Blob fallback when the quota is
+        small), WORKERFS-mounted; ffmpeg -c:v copy, native AAC 192 kbps, subtitles where the
+        container allows, metadata and chapters kept; MP4 or MKV decided from ffprobe JSON;
+        saved with showSaveFilePicker or the platform save (Blob path under 1 GB).
+  [x] 3 Limits and honesty: 1 GB cap with audio-only offer and one sentence; phones have no
+        video option and keep the 30-minute audio limit; dialog shows baked-in settings, estimate
+        (render benchmark + measured mux rate), two-step progress bar driven by the renderer and
+        ffmpeg's progress events, Cancel (terminates both workers, deletes temp files), Save;
+        "<name> (Clearly).mp4/.mkv". Memory test: 933 MB file, peak +1.9 GB (docs/perf.txt;
+        opt-in VIDEO_MEMORY_TEST=1, about one minute).
+  [x] 4 Tests: Playwright with generated fixtures (H.264+AAC MP4, VP9+Opus WebM -> MP4,
+        VP8+Opus WebM -> MKV, H.264+SubRip MKV -> MP4 with mov_text): video packets bit-identical
+        (framemd5), audio within 50 ms and 0.5 dB of the offline reference, AAC about 192 kbps,
+        language and title kept. Cancel cleans up; oversized offers audio-only; phone; download
+        step with licence link and axe. Unit tests for the mux plan and the manifest. Manual
+        tests (one-hour file, just under 1 GB, and more) in MANUAL_TESTS.txt.
+  [x] 5 Checks pass (see summary); licence decision recorded.
+
+M11 SUMMARY
+  Unit tests 380 + 1 expected failure. Playwright: audio project 68 passed; chromium project
+  all pass with one worker (the full parallel run on this machine had load averages of 25-40
+  from other apps, and many page loads timed out at 30 s; every failed test passed on a
+  one-worker rerun except one real bug, fixed). The Hearing Check Starter test is
+  timing-sensitive under load (failed once, passed on rerun). Production build: a video export
+  works end to end through vite preview; size gate 93.1 KB.
+  Bugs found and fixed: Emscripten 4+ no longer lists FS.filesystems (wrapper mount failed);
+  configure silently ignored "mov_text" (it is "movtext"); private windows' small OPFS quota;
+  the WAV worker import broke all exports for a moment (caught by tests); test hooks were
+  shipping in production builds (import.meta.env bracket access is not replaced at build time;
+  now the dot form, declared in src/env.d.ts, and the hooks are dropped).
+
+M10 CHECKLIST
+  [x] 1 Navigation: five destinations; sidebar (>=1024, More's children listed), rail with
+        tooltips (768-1023), bottom tab bar with safe areas (<768); More page; Get Clearly
+        Everywhere (real phone install steps; desktop app "Coming soon" until
+        M12); every page has a title, focus on the h1, and one BackLink on sub-pages.
+  [x] 2 First run (/welcome): Welcome (promise line, restore link), How to start (Quick start by
+        age, Measure my hearing with N from expectedDurationSeconds), Hear it (demo with big
+        Original | Enhanced, Which sounds clearer?, Fine-tune / Continue), How you watch (tab by
+        capability, file, desktop, phone); stepper; skip and resume from kv; "Continue setting up"
+        on results.
+  [x] 3 Home: new person -> "Set up my sound"; returning -> "Start Clear Audio" (resumes the open
+        source, the demo, or a tab via the coach) and at most one suggestion (ordering
+        unit-tested); "Hear an example" on Voice focus, Night mode and Hum Filter (player and
+        Quiet Lab), 8 s off then 8 s on, announced, tap only.
+  [x] 4 Copy sweep: banned-word and "!" test with a two-id allowlist, literal-JSX test (all
+        components, /design exempt), readability report (88 percent of sentences at or under
+        grade 7; over grade 9 listed below), REGULATORY_REVIEW updated for changed strings.
+  [x] 5 Accessibility: axe on every route in light, dark and high contrast and at 200 percent
+        text (no sideways scrolling); High contrast and theme switch built (Appearance);
+        Lighthouse accessibility 100 on all 12 main routes (production build; CI job added);
+        VoiceOver/NVDA/timeouts/theme checklists in MANUAL_TESTS.txt.
+  [x] 6 PWA: manifest with token colours and maskable icons, precached shell and routes (no heavy
+        assets), "A new version is ready. Reload" (never automatic), offline indicator, one-time
+        install banner after the first check / manual Add to Home Screen card (feature
+        detection, logic in DECISIONS). Verified on the production server: service worker
+        controls the page; Quiet Lab, Calm Sounds, Hearing Check and Settings load offline.
+        Wake lock, vibration and the larger phone button exist from M03; not re-verified on a
+        real phone (MANUAL_TESTS).
+  [x] 7 Design review 3: 60 screenshots (1440/1024/390, light/dark), critique and fixes logged in
+        DESIGN_RESEARCH.txt; /design extended (icons, title switch, chips, slider, popover,
+        BackLink, status line, table scroll).
+  [~] 8 Ship check: pnpm build makes web and server builds; the production server serves the app
+        and a working API (health, static files, CSP, service worker headers); size gate 92.6 KB;
+        e2e suite (see summary). NOT DONE: the Docker image cannot be built or run here (Docker
+        is not installed). Fresh-clone build not tried (nothing may be committed or pushed).
+
+M10 SUMMARY
+  Unit tests 358 + 1 expected failure. Playwright: 68 audio + the chromium project (onboarding,
+  Starter and Express, profiles, backup/restore file, restore code across two contexts, file
+  playback, WAV/MP3 export, captions, Listening Health, Quiet Lab, axe on every route).
+  Entry chunk 92.6 KB gzipped. Lighthouse accessibility 100 x 12 routes.
+  E2E on this machine: every spec passes when the chromium and audio projects run separately
+  (chromium 63 incl. 20 opt-in design screenshots skipped; audio 68). Run together on a busy
+  machine (load average 10-20 from other apps), several CPU-bound audio renders and real-time
+  checks time out; they pass on rerun. Not a code failure, but CI should keep them in separate
+  jobs or give them more time.
+  Bugs found in earlier milestones and fixed here: the spacing scale had no 0 step (every "-0"
+  utility was missing); Button size classes lost to the defaults; the API rate limit also
+  limited the web app's own files (60 per minute would block a production page load);
+  workbox-window was missing, so the service worker never registered in production builds.
+  Strings over grade 9 for review: pre.consent (10.8, regulated wording), cal.reason (9.8),
+  player.noProfileNote (9.4), reminder.check.notifyHint (9.1).
+  THE WEB APP IS SHIPPABLE except for: the Docker image is unverified (no Docker here), the TTS
+  demo clip and digit recordings (open question 10), and the owner's open questions below.
+
+M09 CHECKLIST
+  [x] 1 Landing page /quiet: three cards (what it does, what it cannot do), "What does this do?"
+        popovers (Radix Popover), no "experimental"; Quiet Lab in the main navigation.
+  [x] 2 Hum Filter: Off / Auto / 50 Hz / 60 Hz card in Clear Audio; Auto = Tap A analyser, 8192
+        FFT every 500 ms, parabolic peaks, 12 dB prominence, 3 s steady within 0.5 Hz, slow
+        follow, 2 s hold; notch bank (stagger pairs, Q 30, smoothed); readout "Removing hum at
+        60 Hz and 5 harmonics"; "Hear the demo with hum". Offline tests: 49.5/50.5/59.5/60.5 Hz
+        detected within 0.2 Hz, at least 25 dB lower, speech band under 1 dB; cello note not
+        locked; mode switches click-free. Optional before/after spectrum not built (recorded).
+  [x] 3 Headphones dialog (focus-trapped, session memory, reachable from "Why headphones?"),
+        microphone pre-prompt, getUserMedia with processing off, denied / no microphone /
+        unavailable states with a way forward.
+  [x] 4 Auto Boost: 2 s / 5 s smoothing, -55..-30 dBFS to 0..+6 dB ambient and 0..6 dB lower
+        threshold through core precedence and the clamp, 3 dB hysteresis, Sensitivity, feedback
+        guard (correlation above 0.6 for 5 s pauses with the specified message), live room meter,
+        "Currently adding +X dB", honest line, works only while Clear Audio plays (page says so
+        and links there; controls also in a Clear Audio card); dotted overlay already in Insight.
+  [x] 5 Calm Sounds /quiet/calm: worklet generators (white, pink, brown, rain, ocean, tailored,
+        tone) with spectrum tests; pitch match (6 kHz, third-octave steps, octave check, saved to
+        the profile, redo); big Play/Stop; volume capped in the graph at Lc - 10 dB RMS or
+        -24 dBFS; sleep timer 15/30/60/90/all night with a 60 s fade; phone note; required line
+        (in REGULATORY_REVIEW); counted by the safe-listening tracker.
+  [x] 6 Tests: unit (Auto Boost mapping, smoothing, hysteresis, guard, precedence; generator
+        spectra and RMS; cap with malicious values; pitch steps), offline (hum removal, mode
+        clicks, cap per generator, fade and source change click-free), Playwright (Quiet Lab +
+        popover + axe, Hum Auto on the demo with hum, Auto Boost with a scripted fake microphone
+        incl. feedback pause, Calm Sounds pitch match and shortened sleep timer, axe);
+        MANUAL_TESTS.txt updated.
+  [x] 7 Checks pass. Not committed (owner instruction).
+
+M08 CHECKLIST
+  [ ] 1 Speech in noise: recordings BLOCKED (Q10). Everything else done: digit preparation with an
+        RMS-equality test, LTASS IIR noise (fit 0.72 dB, tested within 2 dB), diotic levels from
+        Lc (needs a calibration first), adaptive 2 dB steps, clamp, scoring in core with scripted
+        tests, number pad with keyboard and Not sure, one play per triplet, progress, Skip,
+        results with actions, sinChecks, hint chip, regulatory strings.
+  [x] 2 Safe-listening tracker: 1 s stereo RMS from the final tap against Lc - 3 dB, three zones,
+        Hearing Check counted, per-day minutes only, honest line, off without calibration, today
+        bar, 7-day chart with table, daily alert (default 15 min, once per day, lower the limit by
+        6 dB), pause and clear.
+  [x] 3 History and reminders: list of all results, compare two with overlay and table and the
+        notes, reminder every 6 months (configurable or off), Home card, local notification only
+        while open and only after opting in, at most weekly.
+  [x] 4 Tests: unit (DIN scoring and clamp, LTASS fit, digit RMS, zones, midnight and DST in four
+        time zones, alert once a day, reminder throttling), component (number pad with keyboard),
+        Playwright (full DIN run with stand-in digits, missing-digits message, tracker minutes,
+        history overlay, axe).
+  [x] 5 Checks pass. Not committed (owner instruction).
+
+M07 CHECKLIST
+  [x] 1 Model delivery: tiny.en and base.en (timestamped ONNX exports, q8), ONNX Runtime wasm, in
+        heavy-manifest with checksums and licences, served from /heavy/; local-only config; a
+        Playwright test fails on any off-origin request; first-use line with sizes from the
+        manifest, metered confirmation, progress, Cache API, Settings removal, failure panel.
+  [x] 2 Worker: WebGPU after a real test run, else WebAssembly (single thread unless isolated);
+        Tap A capture worklet (mono, 16 kHz, chunks over a port); 8 s windows with 1 s overlap;
+        energy VAD; merge by word timestamps (fixture-tested); model dropdown, English only.
+  [x] 3 Files: read ahead with the chunked reader at 16 kHz; live fallback stated; "Captions ready
+        for X of Y"; Captions first (10 s); captionCache by file hash (instant reopen tested);
+        SRT and VTT downloads.
+  [x] 4 Live: lag notice, 6 s minimum display, backlog drop past 15 s with notice.
+  [x] 5 Display: Off / On for this video / Always on; Document Picture-in-Picture with copied
+        styles, aria-live, Escape; panel fallback; size, lines and three schemes (token-checked).
+  [x] 6 Tests: unit (windows, VAD, merge, cues, SRT/VTT, backlog, live display rule); Playwright
+        (real tiny.en on a public-domain recording: timed words, SRT/VTT, no third-party
+        requests, panel fallback, axe); MANUAL_TESTS.txt updated.
+        Note: the demo clip has no words (synthetic, Q10), so the public-domain JFK recording is
+        the speech fixture instead.
+  [x] 7 Checks pass; sizes and WebGPU/WASM results recorded. Not committed (owner instruction).
+
+M06 CHECKLIST
+  [x] 1 Night mode: loudness-rider worklet (BS.1770 48 kHz constants, 3 s window, +3/-6 dB/s,
+        gate at -60 LUFS) and a tighter compressor per level (choices recorded), crossfaded slot
+        (30 ms) at unchanged latency; card with switch, Light/Medium/Strong, Loudest-sound limit,
+        Night chip, schedule (works only while open); offline tests for range shrink per level,
+        safety peaks, no clicks; Node tests for rate limits and gate.
+  [x] 2 Background cleanup: RNNoise build chosen and recorded, in heavy-manifest and /heavy/,
+        480-sample frames per channel, 32768 scaling, latency = CLEANUP_LATENCY_SAMPLES (480
+        measured), module compiled on the main thread and passed to the worklet, 48 kHz-only
+        with a plain message otherwise, strength crossfade inside (60 percent first time), first-use
+        download flow (size, tap, metered confirm, progress, Cache API, failure panel), voice
+        indicator, Music precedence, hint chip with a fixture test.
+  [x] 3 Performance: 8.5 percent of a quantum with cleanup + Night Strong + Voice focus (budget
+        15); docs/perf.txt.
+  [x] 4 Tests: Node (cleanup latency, null, 10 dB, block-size invariance; rider limits and gate),
+        Playwright (graph latency/null/reduction, Night range, clicks, perf, download flow, 404
+        failure, Night toggling during playback, axe).
+  [x] 5 Checks pass. Not committed (owner instruction).
+
+M05 CHECKLIST
+  [x] 1 Sources: cards from listAudioSources, selector on top; tab capture with coach (SVG steps,
+        don't-show-again), getDisplayMedia options, video stopped, no-audio error, quiet cancel,
+        ended event, doubled-sound check with the mute question; unavailable-capture cards;
+        file drop and picker (accept="audio/*,video/*"), media-element playback, video shown,
+        unsupported-format message, custom transport (K/J/L, seek with buffered, volume, speed
+        with preservesPitch), Media Session.
+        [ ] Bundled 60 s TTS demo clip: BLOCKED (open question 10). Synthetic clip used meanwhile.
+  [x] 2 Player: source chip, waveform, Original | Enhanced (Space, hold H, Simulate in Demo
+        mode), Strength, preset chips (no Night yet), Voice focus card with mono message, "See
+        what Clearly is doing" (EQ + spectrum + Auto Boost overlay, meters, tables), Advanced
+        (per-band sliders, cap, boost style, Loudest-sound limit, output device), defaults,
+        words on every slider, precedence, overload notice with Resume, dev perf panel.
+  [x] 3 Export: chunked reader (mediabunny + WebCodecs + resampler), decodeAudioData fallback
+        within 150 MB, save picker or Blob under 1 GB, WAV and MP3 with bitrates, dialog with
+        settings, estimate, progress, Cancel, Save; 3 h / 30 min limits; output name.
+  [x] 4 Tests: component (source cards per capability, tab-capture error paths), Playwright
+        (demo, keyboard shortcuts, file Original | Enhanced via analyser, WAV and MP3 against the
+        reference, axe); MANUAL_TESTS.txt started.
+  [x] 5 Checks pass; design review 2 logged. Not committed (owner instruction).
+
+M04 CHECKLIST
+  [x] 1 Local storage: Dexie v2 with every table, zod + migrations tested from every fixture, file
+        hash, Storage section (estimate, persistence, request), one-time tip, backup file, restore
+        from file with preview and confirmation, 30-day backup reminder (switchable).
+  [x] 2 Profiles: up to five, each with a headphone name; selector on the Hearing Check (output
+        label auto-select when labels exist, no permission asked); rename, change headphones,
+        duplicate ("I got new headphones"), delete with confirmation and backup offer.
+  [x] 3 Settings page: Profile, Sound defaults, Storage and backup, Back up and move, Demo mode
+        (three in-memory demo profiles, never synced), About and privacy; Send feedback with the
+        exact text shown and a mailto fallback.
+  [x] 4 Server: Fastify 5 + zod provider, SQLite WAL with migrations, helmet CSP, CORS allowlist,
+        rate limits, cooldown, alarm, TRUST_PROXY, all endpoints, hashed tokens, HMAC codes,
+        AES-256-GCM with rotation, retention and code purges, SPA serving with cache headers,
+        .env.example, Dockerfile (not built: no Docker here), 20 inject tests, PRIVACY.txt and
+        the in-app privacy page.
+  [x] 5 Client sync: consent-gated, 5 s debounce, versions, 409 dialog, history opt-in, restore
+        code with countdown/copy/new code, restore from code (welcome and Settings), sign out
+        other devices, delete cloud backup, offline banner with Retry, share link.
+  [x] 6 Tests: migrations, backup round trip, share link (tampered), Playwright for profile switch,
+        backup/restore file, restore code across two contexts, conflict, delete, server down,
+        share link, axe on the new routes.
+  [x] 7 All checks pass; PRIVACY.txt complete. Not committed (owner instruction).
+
+M04 SUMMARY
+  Unit tests 267 + 1 expected failure (core 155, web 47, server 20, audio 49, scripts).
+  Playwright 76 (chromium 19 incl. 8 M04 flows against a real test server; audio 57).
+  Entry chunk 80.1 KB gzipped.
+
+M03 SUMMARY
+  Entry chunk 75.4 KB gzipped (limit 250). Web unit tests 22, core 134 + 1 expected failure.
+  Playwright chromium project: 10 tests (design page + Hearing Check flows); audio project 57.
+
+M01 SUMMARY (numbers from docs/sim-results.txt, 1000 fixed-seed runs each)
+  Tuning ladder: passed at stage 1 (maxTrials 4).
+  Express: 95.35% of thresholds within 8 dB of truth (target 95%); mean 34.77 trials including
+    catch trials (target 36); P95 40 (target 44); median absolute error 2.2 dB.
+  Refine: 95.94% within 5 dB (target 95%); mean 59.96 trials, P95 68.
+  Expected Express duration: 54.4 s by the timing model, shown as "about 60 seconds" (80 s at
+    slower pace). Refine: about 100 seconds (130 slower). Starter: 5 seconds.
+  Reliability: normal listeners rated Low 0.0% (target at most 5%, met). High-guess listeners
+    rated Low 1.9% (target at least 80%, NOT met; see open question 1).
+
+M02 SUMMARY (measured in Chromium 158 on an Apple M3, 2026-11-09)
+  latencySamples: 1728 samples = 36.0 ms at 48 kHz, input to output. Wet path and dry delay 1632
+    (cleanup slot 960 + compressor stage 288 + program limiter 288 + Loudest-sound limiter 96),
+    plus the Safety limiter 96. The 288-sample compressor delay is Chromium's and is measured when
+    a graph is built. An impulse through the graph arrives at exactly 1728 in Original and Enhanced.
+  Safety: sample peak at most -3.00 dBFS and 4x-oversampled peak at most -3.00 dBFS for full-scale
+    squares, a clipped sweep, impulses and noise with +24 dB boosts, in Enhanced, Original and
+    Simulate. Loudest-sound limit holds at -24, -12 and -6 dBFS. Summed boost 24.00 dB (plan) and
+    24.0015 dB (measured through the graph). Null test: flat to 0.0001 dB at a 50 percent
+    crossfade. Overload guard: fires 0.24 s into a forced overload and fades to silence; never
+    fires on programme.
+  Clicks: none on a 20 s programme with every control automated. The detector finds gain steps of
+    3 dB or more and clicks of -26 dBFS or louder on processed programme, and has no false alarms
+    on clean renders.
+  Renderer: 4-minute segmented render is bit-identical to a single pass in practice (-348 dB); a
+    30-minute render keeps retained memory flat at about 100 MB (peak under 190 MB, page included)
+    and finishes in about 1 minute.
+  Encoders: WAV exact. MP3 (mediabunny + LAME, MPL-2.0 / LGPL-2.0) at 128 to 320 kbps: duration
+    +32 ms, level within 0.47 dB (closest to the 0.5 dB limit at 128 kbps).
+  Performance: the four worklets together take 0.8 to 2.9 percent of a render quantum live
+    (budget 15 percent with Background cleanup on). docs/perf.txt.
+
+WHAT WORKS (verified 2026-11-09)
+  M00 tooling as before: install, typecheck, lint, test, check:tokens, check:tracked,
+  check:ignore, build, check:size, test:e2e, pre-commit hook.
+  packages/core (M01), pure TypeScript, no DOM or Web Audio:
+    zod schemas with schemaVersion and a migration engine for Audiogram, Calibration, Profile
+      (with optional headphoneCompensation, default zeros) and Settings; a harness that requires
+      a migration and a fixture for every version.
+    Starter (ISO 7029-like) and R(f) tables; PCHIP (Fritsch-Carlson) on log frequency.
+    HearingCheckSession: Bayesian per-track estimator in dBFS with RelLc outputs, Beta(1,49)
+      guess-rate updating with re-weighting, catch trials, information sharing, Express and
+      Refine scheduling, edge flags, seeded RNG.
+    Loss (with headphone compensation), reliability, referral flags, audiogram builders.
+    Gain with soft knee, the summed-boost clamp (Web Audio biquad formulas), presets and settings
+      precedence.
+    Timing model and expectedDurationSeconds from generated simulation constants.
+    Simulated listener, `pnpm --filter core sim` (writes docs/sim-results.txt and
+      src/generated/simStats.ts), `pnpm --filter core tune`.
+  pnpm --filter core test: 115 tests pass plus 1 expected failure (the unmet reliability target),
+  about 7 s including the 2000-run accuracy suite.
+  packages/audio (M02), standard Web Audio, depends on core:
+    buildProcessingGraph for AudioContext and OfflineAudioContext with update, setMode, setBlend,
+      taps (analyser, loudness, compression reduction, safe-listening tracker, captions Tap A),
+      latencySamples and latency budget, mono detection, overload guard with resumeAfterOverload,
+      topology record, getPerf, dispose.
+    clearly-limiter worklet (stereo-linked lookahead limiter, 4x-oversampled peaks) used as the
+      Loudest-sound limiter and the Safety limiter; clearly-monitor worklet (mono, loudness,
+      overload guard, perf probe).
+    Tone generator: warble and calibration ramp, each through its own Safety limiter.
+    renderOffline with ChunkedSourceReader, AudioBufferReader, progress and cancel.
+    WAV and MP3 encoder sinks in a Web Worker.
+    Discontinuity detector.
+  Root pnpm test: 185 pass plus the 1 expected failure (scripts, web, core, audio).
+  pnpm test:e2e: 64 pass (7 design-page tests plus 57 audio tests in Chromium, about 1.3 minutes).
+
+WHAT WORKS (M03, verified 2026-11-09 in Chromium 158)
+  Starter in one tap; pre-check; calibration; a full Express run with scripted responses;
+  results with chart, sentence, reliability, referral card; Fine-tune (Refine) with pause and
+  finish later; PDF download; demo clip through buildProcessingGraph with Original | Enhanced.
+
+WHAT DOES NOT WORK OR IS NOT BUILT (M04)
+  The Docker image has not been built or run (Docker is not installed here). The production CSP
+  has not been checked in a browser against the production build (planned for M10/M14).
+  Output-device auto-select could not be exercised with real device labels here.
+  Feedback's email fallback has no recipient address (open question 11).
+
+WHAT DOES NOT WORK OR IS NOT BUILT (M03)
+  The demo clip is a self-generated speech-like sound, not speech. The real 60-second clip (M05)
+  needs a TTS voice; none is available here (open question 10).
+  The Hearing Check has been heard only through scripted tests and the fake engine: no person has
+  done a check with real headphones yet. Wake lock, vibration and Web Share were not exercised on
+  a device. Firefox and WebKit are not installed for Playwright (`npx playwright install firefox
+  webkit` is needed before M14).
+  apps/server and apps/desktop are still scaffolds.
+  Background cleanup is a fixed 960-sample DelayNode until M06 (RNNoise); Night mode falls back to
+  the normal compressor until M06; hum notches have no detection until M09. The graph reports
+  capabilities.backgroundCleanup and capabilities.nightMode as false so the UI can say so.
+  Tested only in Chromium. Firefox and Safari are not tested: the compressor delay is measured at
+  run time and cancelAndHoldAtTime has a fallback, but neither has been run there.
+  NOT VERIFIED: RNNoise's own delay (480 samples assumed; M06 must measure it with an impulse).
+  NOT VERIFIED: the 4 GB WAV refusal is tested with the up-front length check and a small injected
+  limit, not by writing 4 GB.
+  docs/perf.txt is rewritten on every e2e run (machine-dependent numbers).
+  The reliability target for high-guess listeners is not met (open question 1).
+  Express can under-estimate a band far above the prior (open question 2).
+  CI has not run on GitHub yet; nothing has been pushed.
+  The not-found page still offers no way forward (no start page yet).
+
+OPEN QUESTIONS FOR THE OWNER
+  1. RELIABILITY TARGET CANNOT BE MET UNDER THE SPECIFIED RULE (M01). The target says at least 80%
+     of listeners with an 8 to 12% guess rate should be rated Low. Under the section 4 rule, Low
+     needs more than max(2, floor(0.30 n)) false alarms in n catch trials. A 10% guesser expects
+     about 0.1 n, so with n = 6 the chance of 3 or more is about 2%, and no number of catch
+     trials closes the gap (0.1 n stays below 0.30 n). Track SDs do not help: the estimator stays
+     confident. Measured: 1.9% (Express), 0% (Refine). Nothing was changed. Options:
+       a. Relax the target (for example "rated Medium or Low", or a lower share).
+       b. Change the rule, for example Low when fa >= 2 with n <= 8. This would also rate about 1
+          in 50 normal listeners Low and needs re-simulating against the 5% limit.
+       c. Add a second signal, such as "heard" answers far below a track's estimate.
+       d. More catch trials. This alone cannot reach 80% under the current rule.
+     The test is marked it.fails with this explanation until you decide.
+  2. EXPRESS UNDER-ESTIMATES BANDS FAR ABOVE THE PRIOR (M01). With 4 trials a track moves only
+     about 25 to 30 dB from its prior, and the Gaussian prior makes the result look confident
+     (SD about 6 dB). Someone who hears nothing at a band gets a threshold far too low and is not
+     flagged. Only 71% of past-ceiling tracks are flagged in Express (86% in Refine). The accuracy
+     targets still pass because such listeners are rare in the simulation. Possible fixes, both
+     changes to the specified algorithm: a heavier-tailed prior, or an extra trial when every
+     answer on a track is the same. Should we change it?
+  3. (still open after M02) Neighbouring Q 1.0 EQ peaks overlap. Using band gains directly as
+     filter gains roughly doubles the intended boost (10 dB in every band peaks at 28 dB), and
+     the +24 dB clamp will then cut typical prescriptions. M02 uses core's band gains directly, as
+     its prompt requires ("never computed here"). Fitting filter gains to the target curve would
+     belong in core. Please confirm whether to do it, and in which milestone.
+  4. (from M00) RULES.md still says .gitignore un-ignores CLAUDE.md, but we un-ignore RULES.md as
+     the M00 prompt and your instruction asked. Please update that line in RULES.md.
+  5. (from M00) RESOLVED 2026-11-10: the owner committed the work as "initial" (a943eb4) and
+     pushed it to origin/main.
+  6. (from M00) Node 24 is keg-only Homebrew node@24: add /opt/homebrew/opt/node@24/bin to PATH.
+  7. (M02) MAKEUP GAIN. Web Audio's DynamicsCompressorNode adds automatic makeup gain: +8.2 dB for
+     quiet input at the RULES.md compressor settings, +1.7 dB at the program limiter. With the
+     -3 dB pre-attenuation, Enhanced is about 7 dB louder than Original in quiet passages, and
+     louder tends to sound "better" in an A/B comparison. RULES.md specifies only the compressor
+     parameters, so nothing was compensated. Should Enhanced be loudness-matched to Original (for
+     example a fixed gain after the program limiter that cancels the makeup)?
+  8. (M02) VOICE FOCUS RANGE. The M02 prompt's mid boost (+4 dB) differs from core's
+     VOICE_FOCUS_MAX_DB (6). The graph follows the prompt and tells the clamp the real value.
+     Should core's constant be changed to 4 so the two read the same?
+  9. (M02) CONFLICTS RECORDED in DECISIONS.txt: the prompt's dry-delay formula (would misalign the
+     paths by the Safety limiter's 96 samples) and its equal-power join crossfade (would swell
+     identical audio by 3 dB). RULES.md and the residual test were followed.
+
+  10. (M03) DEMO CLIP AND DIGITS NEED A TTS VOICE. M05 needs a 60-second two-voice clip and M08
+     needs recorded digits 0 to 9, both from a permissively licensed TTS voice. None runs here
+     (no espeak-ng or Piper installed; macOS `say` voices are for personal, non-commercial use).
+     Options: (a) you supply the recordings; (b) approve installing Piper with a named voice whose
+     model card allows commercial use (for example a CC0 or CC-BY voice; we would check its card);
+     (c) approve espeak-ng (GPL-3 program; its output audio is generally not covered by the GPL,
+     but please confirm you are comfortable). Until then the demo uses the synthetic clip.
+
+  11. (M04) FEEDBACK EMAIL. The offline "Send by email" link has no recipient. What address
+     should feedback go to?
+  12. (M04) RESTORE PREVIEW CONSUMES THE CODE. Redeeming a code (which the preview needs) uses it
+     up, so cancelling at the preview means making a new code. Acceptable, or add a separate
+     preview endpoint?
+  14. (M05) The old M03 demo page file (apps/web/src/demo/DemoPage.tsx) is no longer used. You
+     asked that no files be deleted, so it is still there. May it be removed?
+  15. (M07) transformers.js 4.3.1 pins a development build of onnxruntime-web
+     (1.31.0-dev.20260914). It works in every test here. Is a dev build acceptable for release,
+     or should we wait for a transformers release on a stable ONNX Runtime?
+  13. (process) The owner asked for nothing to be committed or pushed. Milestones are left as
+     uncommitted work in the working tree. History was reset to 3924714 and GitHub main was
+     force-pushed back to it on the owner's instruction.
+
+  16. (M09) Auto Boost's +6 dB goes through the +24 dB summed-boost clamp, so with a strong
+     profile (for example the 70 to 79 Starter) it adds little or nothing near 2.5 kHz while the
+     readout still says "+6.0 dB". Should the readout show what actually reaches the ear, or
+     should Auto Boost get headroom of its own? (Linked to question 3.)
+
+WHAT DOES NOT WORK OR IS NOT VERIFIED (M09)
+  Auto Boost, the feedback guard and Hum Filter have only been tested with simulated signals; the
+  real-room, real-speaker and real-humming-video checks are in MANUAL_TESTS.txt. Calm Sounds on a
+  locked phone screen is not tested. The Hum Filter before/after spectrum (optional) is not built.
+  Real-time Playwright tests now use Chromium's fake audio sink (--disable-audio-output), because
+  this Mac's output device stopped advancing real-time contexts.
+
+  17. (M11) RESOLVED 2026-11-10: the owner installed Emscripten (option b). Clearly builds its
+     own LGPL-2.1-or-later core; details in DECISIONS (M11). Nothing to decide unless you want a
+     lawyer to confirm the source offer at /heavy/ffmpeg/source/.
+  18. (M07) May the unused, non-timestamped Whisper model folders in apps/web/public/heavy be
+     deleted? (They are not tracked by git; nothing uses them.)
+  19. (process) Should the local git reflog, which still lists the removed commits, be purged?
+  20. (M10) Docker is not installed here, so the Docker image is unbuilt and untested. Install
+     Docker, or test the image elsewhere?
+  21. (M12) Where will the desktop installers be downloaded from? Get Clearly Everywhere still
+     says "Coming soon" for the desktop app, and About uses CLEARLY_DOWNLOAD_URL (unset, so a
+     placeholder). Give a URL (a release page, for example) and the card gets real steps.
+  22. (M12) The desktop app needs CLEARLY_SERVER_URL at build time for backup, sync and heavy
+     downloads (captions, video tool, Background cleanup). Which server URL should builds use?
+  23. (older, found in M12) A dialog's scroll lock injects a <style> element that the CSP blocks
+     (style-src 'self'). Harmless apart from the page possibly scrolling behind a dialog. Allow
+     it with a hash, or leave it?
+  24. (M14) React Router 6 has two moderate advisories fixed only in 7.18 (neither is reachable in
+     Clearly; DECISIONS M14). RULES.md names React Router 6. Stay on 6, or plan a move to 7?
+
+NEXT STEP
+  All milestones are done (M13 dropped). What remains needs the owner: the open questions above,
+  the release checklist, and committing and tagging v1.0.0-rc1.

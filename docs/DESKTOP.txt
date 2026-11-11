@@ -1,0 +1,75 @@
+CLEARLY: DESKTOP APP (M12)
+
+WHAT IT IS
+  apps/desktop is Electron 45.2.3. It loads the built web app (apps/web/dist) on clearly://app,
+  a privileged custom scheme (standard, secure, fetch, CORS, service workers, streaming), served
+  by protocol.handle with path-traversal checks, MIME types (application/wasm included), byte
+  ranges and the single-page-app fallback. Heavy files (/heavy/: Whisper models, the video tool,
+  Background cleanup) are not in the installer; they are fetched from the configured server on
+  first use, after the same tap and SHA-256 check as on the web.
+
+BUILD AND RUN
+  pnpm --filter @clearly/desktop dev        build the web app and the desktop bundle, then start
+  pnpm --filter @clearly/desktop package    installers for this computer into apps/desktop/release/
+  Build-time configuration (environment variables, read by apps/desktop/scripts/build.ts):
+    CLEARLY_SERVER_URL    the Clearly server (backup, restore codes, sync, heavy downloads);
+                          the CSP's connect-src allows only this origin besides the app
+    CLEARLY_DOWNLOAD_URL  the download page shown in About (there is no auto-update)
+  CI: .github/workflows/desktop.yml builds Windows NSIS (x64), macOS dmg (universal) and Linux
+  AppImage (x64) on matching runners and uploads them. Run it by hand or push a v* tag.
+  Note: editors built on Electron (VS Code, Cursor) set ELECTRON_RUN_AS_NODE=1 for their
+  terminals. Unset it before starting Electron by hand, or it starts as plain Node.
+
+SECURITY
+  Windows: contextIsolation, sandbox, no nodeIntegration, webSecurity. Strict CSP (the web CSP,
+  connect-src limited to the app, blob: and the server URL). Navigation and window.open are
+  blocked except clearly://app; https links open in the default browser. Permissions: only
+  microphone (audio, never camera) and screen capture, and only for clearly://app. The preload
+  is one bundled CommonJS file exposing window.clearlyDesktop with an allowlist of channels; every
+  payload is checked with the shared zod schemas (packages/core/src/desktop/ipc.ts) in the preload
+  and again in the main process, which also checks the sender frame's URL.
+  Electron Fuses (scripts/afterPack.cjs): RunAsNode off, NODE_OPTIONS off, --inspect arguments off,
+  cookie encryption on, OnlyLoadAppFromAsar on, file:// extra privileges off. Checked on a packaged
+  macOS build with "electron-fuses read".
+
+HEARING OTHER APPS
+  1. System sound (getDisplayMedia, the main process grants the first screen with audio
+     'loopback'; the picture is stopped at once). Electron 45 documents loopback for Windows only.
+     macOS 27.0.1 (tested): forcing loopback fails ("Invalid capture constraints", or hangs once
+     Screen Recording is allowed); without it the screen comes with no audio. So the app offers
+     System sound only on Windows. Linux: documented as unsupported; not tested here.
+     'loopbackWithMute' is not used anywhere until a Windows test confirms that it silences the
+     original sound but not Clearly's own playback; until then the "you may hear it twice"
+     warning shows and points to the virtual cable.
+  2. Virtual cable (works on every OS): the wizard at Clear Audio > Virtual cable. Devices whose
+     labels contain BlackHole, VB-Cable/CABLE, Loopback, Soundflower or VoiceMeeter are marked.
+     Labels need microphone permission, asked with an explanation first. Capture uses
+     getUserMedia with the exact device and no echo cancellation, noise suppression or gain
+     control; output goes to the chosen headphones with AudioContext.setSinkId. The same device
+     on both sides is refused (it would loop). "Test the routing" plays a 1 kHz tone into the
+     cable's other end and passes if it arrives within 2 seconds.
+  macOS: the microphone prompt uses NSMicrophoneUsageDescription (Info.plist). System sound on
+  macOS would also need System Settings > Privacy & Security > Screen & System Audio Recording.
+
+OTHER DESKTOP FEATURES
+  Tray: Enhanced, Original, Show Clearly, Quit. Global shortcut (default CommandOrControl+Shift+E)
+  switches Original | Enhanced; change it or turn it off in Settings > Desktop app, which says so
+  when it cannot be registered. Floating captions: a frameless, always-on-top, resizable window
+  with a see-through background, remembered per display, read out through aria-live, closed with
+  Escape. Automatic backup: profile-backup.json in the user-data folder after every change
+  (debounced, written through a temporary file and renamed); "Show backup folder" in Settings.
+  Single instance, window size and position restored, standard menus with Edit roles (copy and
+  paste work). About shows the version and the download page.
+
+UNSIGNED BUILDS: FIRST LAUNCH
+  Builds are unsigned unless certificates are supplied as CI secrets (CSC_LINK and
+  CSC_KEY_PASSWORD for electron-builder; Apple notarisation needs APPLE_ID,
+  APPLE_APP_SPECIFIC_PASSWORD and APPLE_TEAM_ID). Never commit certificates.
+  macOS (wording as of macOS 15; confirm on the release macOS version, MANUAL_TESTS M12 item 9): open the dmg and drag Clearly to Applications.
+    The first open says Apple cannot check it for malicious software. Choose Done, then open
+    System Settings > Privacy & Security, scroll to Security, and choose "Open Anyway" next to
+    the message about Clearly; confirm with your password and choose Open Anyway again.
+    (Older macOS: Control-click the app, choose Open, then Open.)
+  Windows: run the installer. If SmartScreen says "Windows protected your PC", choose
+    More info, then Run anyway.
+  Linux: make the AppImage executable (chmod +x Clearly-*.AppImage) and run it.

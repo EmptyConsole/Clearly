@@ -1,0 +1,167 @@
+CLEARLY: MANUAL TESTS
+Checks that need real hardware, real browsers or a person. Run before each release
+(RELEASE_CHECKLIST.txt) and record the date, browser and version, OS and result next to each.
+
+M05: CLEAR AUDIO
+1. Tab capture, Chrome (latest), Windows, macOS and Linux
+   a. Open a video in one tab and Clearly in another. Clear Audio, "Choose a tab", follow the
+      coach, pick the video tab, turn on "Also share tab audio".
+   b. Expect: the chip "Enhancing: <tab title>", the line "Switch to your video now...", sound
+      enhanced; the original tab is silent (suppressLocalAudioPlayback).
+   c. Switch to the video tab for 5 minutes. Expect: no gaps or slowdowns. Note any throttling.
+   d. Stop sharing from the browser's bar. Expect: "Sharing stopped..." and a way to choose again.
+   e. Cancel the picker. Expect: nothing happens, no error.
+   f. Share a tab without ticking audio. Expect: "No sound was shared..." with Try again.
+2. Tab capture, Edge (latest): repeat 1a to 1f.
+3. suppressLocalAudioPlayback per OS: on Windows, macOS and Linux, record whether the original
+   tab is silenced. Where it is not, expect the "You may hear the sound twice" warning; try "Mute
+   the original tab..." and answer Yes or No; record what happens to Clearly's own sound.
+4. Output device (setSinkId): with two outputs connected, choose the second in Advanced. Expect
+   sound to move; unplug it and record what happens (M14 fault-injection covers the app's
+   response).
+5. Long file export: export a 2-hour MP4 to MP3 with the save picker. Record time and the
+   renderer's memory (Task Manager); expect a steady level.
+
+M07: CAPTIONS
+1. Offline captions: download Standard captions, then turn off networking (or stop the server)
+   and reload the app from cache (PWA, M10) or keep the tab open; open a file and turn captions
+   on. Expect captions with no network.
+2. Document Picture-in-Picture (Chrome, Edge): play a file with captions on, press "Open
+   floating captions", then switch to another window or a video tab. Expect the small window to
+   stay on top with captions in the chosen size and colours; Escape inside it closes it; a screen
+   reader announces new captions.
+3. Long file: open a 45-minute or longer video, turn on captions with Captions first. Expect
+   "Captions ready for X of Y" to climb, playback to wait until 10 s are ready, and reopening the
+   same file later to show captions at once.
+4. Live captions on a browser tab (M05 tab capture): expect the one-time "Live captions lag a few
+   seconds behind the picture" line, each caption on screen at least 6 s, and "Captions skipped
+   ahead to keep up" on a slow computer with More accurate.
+5. WebGPU: on a machine with a GPU (not headless), check the Captions card says "Using the
+   graphics processor" in Chrome; record browser and GPU.
+
+M09 QUIET LAB
+1. Auto Boost in a real noisy room: wear headphones, play a file in Clear Audio, turn on Auto
+   Boost (headphones step, microphone pre-prompt, browser permission). Run a kettle, a fan or a
+   TV in the room. Expect the room word to rise (Quiet, A little noisy, Noisy, Very noisy) over a
+   couple of seconds, "Currently adding +X dB" to climb towards +6 dB, and voices to sound a
+   little clearer; when the noise stops, expect it to settle back over about 5 seconds with no
+   fluttering.
+2. Feedback guard with speakers: unplug the headphones so the show plays through the laptop
+   speakers, with Auto Boost on. Expect "Auto Boost paused: it can hear your show. Are you using
+   speakers?" within about 15 seconds, and the boost to stop changing. Plug headphones back in and
+   press "I am on headphones now, resume".
+3. Microphone denied: block the microphone when the browser asks. Expect the "The microphone is
+   blocked" panel with how to allow it again and Try again; Clear Audio keeps playing.
+4. Hum Filter on a real humming video (for example an old home video or a recording with a
+   ground-loop hum): open it in Clear Audio, set Hum Filter to Auto, press Play. Expect "Removing
+   hum at 50 Hz and 5 harmonics" (or 60) within about 5 seconds and the hum to be much quieter
+   while voices sound the same. Switch Off / 50 Hz / 60 Hz during playback: no clicks.
+5. Calm Sounds on a phone: play Rain, lock the screen. Note whether sound continues (it may
+   pause; the card says so). Check the 15-minute sleep timer fades out smoothly over the last
+   minute.
+6. Pitch match with real headphones: the first tone should be soft; Higher and Lower move in small
+   steps; the saved pitch appears; "Matched to my ringing" plays a noise with a gap at that pitch.
+
+M10 SCREEN READERS, TIMEOUTS, THEMES
+VoiceOver (macOS Safari and iOS Safari):
+1. Rotor > Landmarks lists one "Main" navigation and the main region on every page.
+2. Each route change announces the new page heading (focus moves to the h1).
+3. Hearing Check stage: the status line announces each step; the big button is announced as a
+   button with its label; Space and Enter respond.
+4. Charts (audiogram, tracker, Insight): "Show the table" exposes a table with headers.
+5. Clear Audio: Original | Enhanced is a radio group; "Now hearing" is announced.
+6. Floating captions (Chrome only; with VoiceOver in Chrome): new captions are announced.
+NVDA (Windows, Firefox and Chrome):
+7. Browse mode reads each page in order; form mode works in Settings fields.
+8. Dialogs (headphones, delete profile) trap focus and Escape closes them.
+9. Toasts are announced once (role status) and do not steal focus.
+Timeouts:
+10. Leave each prompt (pre-check, calibration, mic pre-prompt, install card, update card,
+    dialogs) for at least 20 seconds: nothing disappears or advances by itself (Hearing Check
+    tones excepted).
+Themes and motion:
+11. Settings > Appearance: Light, Dark, High contrast and Match my device change every screen at
+    once; with the device's Reduce motion on, no transitions play.
+12. Text size 200 percent (browser zoom or OS text size): no page scrolls sideways; wide tables
+    scroll inside their own box.
+PWA:
+13. Production build on a phone: install from the browser menu (or Add to Home Screen), open it
+    with networking off: the app shell, Hearing Check, demo and Quiet Lab work; downloads and
+    backup say they need a connection.
+14. Deploy a new build while the installed app is open: "A new version is ready" appears and
+    nothing reloads until Reload is pressed.
+
+M11 VIDEO EXPORT
+1. A real one-hour video (H.264 + AAC MP4, for example a screen recording or a phone video):
+   Clear Audio > Save enhanced copy > Video with enhanced sound > Download the video tool >
+   Make the copy. The estimate is roughly right; the progress bar moves through "Step 1 of 2"
+   and "Step 2 of 2"; Save writes "<name> (Clearly).mp4". The result plays in the system player
+   with the picture unchanged, the enhanced sound in sync from start to end, and the original
+   title and chapters.
+2. A file just under the 1 GB cap (for example 990 MB): video export is offered and finishes;
+   browser memory (Activity Monitor or Task Manager) stays under about 3 GB. A file just over
+   1 GB: no video option, and the sentence about the 1 GB limit shows; WAV and MP3 still work.
+3. A WebM (VP9) screen recording becomes an MP4; an old AVI with an MPEG-4 Part 2 video becomes
+   an MP4; a WebM with VP8 becomes an MKV. Each plays in VLC.
+4. An MKV with SubRip subtitles becomes an MP4 whose subtitles show in QuickTime or VLC; an MKV
+   with Blu-ray (PGS) subtitles says that one subtitle track was left out.
+5. Cancel during each step: "Cancelled. Nothing was saved."; in DevTools > Application >
+   Storage, the Origin Private File System has no clearly-export-tmp files left.
+6. A private (incognito) window: video export still works (the temporary sound goes to memory
+   instead of the small private storage).
+7. A phone (or DevTools device mode with touch): no video option, and the sentence explains why.
+8. The download step's "Its licence and source" link opens a page with the FFmpeg tarball, the
+   patch, the build script and the LGPL text.
+
+M12 DESKTOP APP
+1. Windows 11, system sound: Clear Audio > All computer sound > Start; play a video in another
+   app: Clearly enhances it; Original | Enhanced changes it. Record whether you hear the
+   original too (expected: yes, and the warning offers the cable).
+2. Windows, loopbackWithMute: build with audio 'loopbackWithMute' in capture.ts and repeat 1.
+   Does the original go silent while Clearly's own sound still plays? Only if yes may it be
+   turned on (record the result in DECISIONS).
+3. macOS: All computer sound is not offered; the cable card says it is the way on this computer.
+   Linux: the same (record the distribution and result).
+4. Virtual cable with BlackHole 2ch (macOS) and with VB-CABLE (Windows): install it, follow the
+   four steps; the cable is marked "cable found"; choosing it on both sides is refused; Test the
+   routing passes within 2 seconds; Start plays the video app's sound through Clearly only.
+5. Tray: Enhanced and Original switch the open player; Show Clearly brings the window back;
+   Quit quits.
+6. Global shortcut: Command/Ctrl+Shift+E toggles from another app; change it in Settings >
+   Desktop app; pick one another app already uses: Settings says it could not be used; turn it
+   off: it stops working.
+7. Floating captions across two displays: open them, move them to the second display, close
+   with Escape, reopen: they come back on that display at that size; screen reader reads new
+   lines.
+8. Automatic backup: change a setting; within 2 seconds profile-backup.json in the user-data
+   folder changes; Show backup folder opens it; kill the app during a write: the file is never
+   half-written.
+9. Unsigned first launch on macOS and Windows following docs/DESKTOP.txt; confirm the macOS
+   wording of "Open Anyway" for the current macOS version and update DESKTOP.txt.
+
+M14 PHONES AND TABLETS (real devices; record device, OS and browser versions)
+1. iPhone, Safari, installed to the Home Screen: Quiet Lab > Calm Sounds, play Pink noise, lock the
+   screen. Does it keep playing for 5 minutes? Do the lock-screen controls show "Calm Sounds" and
+   does pause stop it? Record the result in MOBILE.txt; only then may the Calm Sounds card change.
+2. Android, Chrome, installed: the same as 1.
+3. Safe areas: on a phone with a notch or home indicator, the tab bar sits above the indicator in
+   portrait and landscape; nothing hides under the notch.
+4. Hearing Check on a phone: the button is easy to hit with a thumb; the screen does not dim or
+   lock during the check (wake lock); each tap gives a short vibration (Android).
+5. The silent switch (iPhone): with the ring/silent switch on silent, the Hearing Check tones and
+   Clear Audio still play through headphones.
+6. A file from the phone's Files app or gallery opens (audio and video).
+7. Media Session: while Clear Audio plays, the lock screen shows the title, and play/pause work.
+8. Mobile data: with Wi-Fi off, the captions and Background cleanup downloads ask before starting.
+9. Export: a 31-minute file says it is too long; a 20-minute file saves as WAV; no video option.
+10. The phone page's QR code opens the right address from another phone's camera.
+
+HEARING CHECK WITH COMPUTER SPEAKERS
+1. A laptop's built-in speakers, then a pair of desk speakers: choose Computer speakers, sit at
+   arm's length, set a comfortable level, run Express. Every beep comes from both speakers; the
+   screen says "Both ears (speakers)"; it takes less time than with headphones; the results say
+   both ears were checked together; the PDF says "Played through computer speakers".
+2. Compare with a headphone check on the same day: the speakers result should be in the same
+   region (expect several dB of difference from the room and speakers). Record the difference.
+3. Fine-tune (Refine) after a speakers check: it stays in speakers mode; pausing and resuming
+   keeps it.

@@ -1,0 +1,362 @@
+CLEARLY: HEARING MATHS
+Every formula and constant in packages/core, with the reason for it. Code: packages/core/src.
+Constants live in constants.ts (each with a one-line source or reason); this file gives the
+reasoning in full. Measured results: docs/sim-results.txt (generated).
+
+0. HONESTY FIRST
+Consumer headphones vary by roughly plus or minus 10 dB across frequency, which is as large as the
+mild losses we measure, and a browser cannot know the real output level. Every result is
+therefore "how this person heard these sounds with these headphones", never an absolute hearing
+level. The profile carries a per-ear, per-band headphoneCompensation array (dB, default zeros) so
+a correction table can be added later without a schema migration.
+
+1. UNITS
+Everything inside the estimator is absolute dBFS (decibels relative to digital full scale).
+Results are stored in dBFS and relative to the calibration level Lc. Variable names end in Dbfs
+or RelLc and the two are never mixed; conversion is only in estimator/levels.ts:
+  valueRelLc = valueDbfs - Lc,   valueDbfs = valueRelLc + Lc.
+Storing RelLc lets a later Refine re-seed correctly after the person recalibrates (new Lc).
+
+2. LEVELS AND GRID (estimator/levels.ts)
+  Lc          the person's comfortable calibration level, between -80 and -12 dBFS. Calibration
+              stops at -12, so Lc is never louder than that.
+  Ceiling     min(Lc + 12, -6) dBFS. At most 12 dB above a comfortable level, and never above
+              -6 dBFS (the loudest tone peak allowed).
+  Floor       -90 dBFS. Presented levels are clamped to [-90, ceiling].
+  Grid        candidate thresholds on 1 dB steps from max(Lc - 70, -100) up to ceiling + 10.
+              Mass below -90 means "heard even at the quietest level we can play"; mass above the
+              ceiling means "no response at the loudest safe level". Each becomes a flag when at
+              least 50% of the posterior lies there (EDGE_FLAG_MASS: "more likely than not").
+
+3. TABLES (tables.ts)
+3.1 Starter median loss (dB) at 250, 500, 1000, 2000, 4000, 8000 Hz. Approximates the median
+    trends of ISO 7029 (age-related hearing threshold statistics):
+      under 40   0  0  0  0  0  0
+      40 to 49   0  0  1  2  6 12
+      50 to 59   0  1  2  5 12 22
+      60 to 69   1  3  5 10 20 32
+      70 to 79   3  6  9 17 30 44
+      80 plus    5  9 13 25 40 55
+    3 and 6 kHz come from PCHIP interpolation (section 4). If the age question is skipped we
+    assume 50 to 59, the middle of the people Clearly is for.
+3.2 Normal-hearing offset R(f) in dB relative to 1 kHz, approximating the shape of ISO 226 (equal
+    loudness, threshold curve) and ISO 389 (earphone reference thresholds):
+      250 +9, 500 +3, 1000 0, 2000 -3, 3000 -4, 4000 -5, 6000 +4, 8000 +13.
+    A normal ear needs more level at 250 and 8000 Hz and less around 3 to 4 kHz.
+
+4. INTERPOLATION (pchip.ts)
+Shape-preserving monotone cubic Hermite interpolation (PCHIP), Fritsch and Carlson (1980), on a
+log2-frequency axis (octaves equally spaced, as on an audiogram). Tangents start as the average of
+neighbouring secants, are zero where the data turn or are flat, and are pulled inside the
+Fritsch-Carlson circle (alpha^2 + beta^2 <= 9). Result: on every interval the curve is monotone
+between its two data values, so it never overshoots. A flat stretch stays exactly flat, and a
+notch at 4 kHz does not ring. Outside the measured range the end value is held (no
+extrapolation), so Express's unmeasured 250 Hz takes the 500 Hz value. Tested with flat, steep,
+notched and 200 random shapes sampled densely.
+
+5. ESTIMATOR (estimator/*.ts)
+One Bayesian track per ear and frequency, a posterior over the grid, updated in log space.
+
+5.1 Prior. Gaussian with mean
+      Lc - 45 + R(f) + starterLoss(ageRange, f)   dBFS,
+    clamped into the grid. 45 dB: comfortable listening sits about 40 to 50 dB above threshold
+    for normal hearing, so a normal threshold is about 45 dB below Lc. Prior SD: TUNED to 13.5 dB
+    (allowed range 12 to 18; see 5.9).
+
+5.2 Likelihood. P(heard | L, theta) = gamma + (1 - gamma - lambda) * Phi((L - theta) / sigma),
+    and 1 minus that for "not heard". gamma (guess rate) starts at 0.02, lambda (lapse rate) is
+    0.04, sigma is 3 dB. sigma is deliberately a little wider than the simulated listener's true
+    2 dB, so the model is not over-confident about slope. Phi is the standard normal CDF, computed
+    from the Numerical Recipes erfcc approximation (fractional error under 1.2e-7).
+
+5.3 Guess-rate update. gamma has a Beta(1, 49) prior (mean 0.02, worth 50 pseudo-trials). With n
+    catch trials and fa false alarms the posterior mean is (1 + fa) / (50 + n), clamped to
+    [0.01, 0.15]. It is recomputed after each catch trial once at least 3 exist, and every track's
+    posterior is rebuilt from its prior and all its trials with the new gamma. The Beta prior
+    stops one slip in three trials from tripling gamma, which the old raw-rate update did.
+
+5.4 Next level. Posterior median plus uniform jitter in +/-2 dB, rounded to 0.5 dB, clamped to
+    [-90, ceiling]. The median is the bisection point; the jitter stops the next level being
+    predictable from the last answer.
+
+5.5 Stop rule. A track stops when its posterior SD is at most stopSd after at least 2 trials, or
+    at maxTrials. Express: stopSd TUNED to 5.5 dB, maxTrials 4. Refine: stopSd 3.5 dB, up to 8.
+
+5.6 Information sharing. Just before a track's first trial its prior mean is shifted by
+      0.6  x (posterior mean - population prior mean) of the nearest finished frequency in the
+            same ear (equidistant neighbours on the log axis are averaged), plus
+      0.45 x (posterior mean - population prior mean) of the finished track at the same frequency
+            in the other ear.
+    "Population prior mean" is the section 5.1 value before any sharing, so the shift measures
+    how far this person differs from the population. Measuring against a neighbour's
+    already-shifted prior would under-count that difference. The other-ear weight was TUNED from
+    0.3 to 0.45. The weights matter less than the SD settings because tracks are interleaved at
+    random, so early tracks have no finished neighbours.
+
+5.7 Scheduling. Express: 500, 1000, 2000, 4000, 8000 Hz x 2 ears = 10 tracks, chosen at random
+    among unfinished tracks, never the same track twice in a row (unless it is the only one
+    left). Refine: all eight bands x 2 ears = 16 tracks. The 10 Express tracks start from their
+    Express posterior (Gaussian, mean and SD, stored relative to Lc); the 6 new tracks start from
+    the population prior shifted by information sharing from the finished Express tracks. Refine
+    also continues the Express catch-trial history for the guess rate.
+
+5.8 Catch trials. Silent trials: the cue shows, no tone plays, and a "heard" tap is a false alarm.
+    They never touch thresholds; they only feed the guess rate. Target count:
+    max(minimum, floor(tone trials / 5)), minimum 6 (Express) or 8 (Refine). Never the first trial
+    and never two in a row. Placement: at each step, if catch trials are still owed, one is drawn
+    with probability owed / (expected tone trials left + 1). It is forced when the number owed
+    reaches the fewest tone trials that can remain (each open track needs at least one more, and
+    at least 2 in total), which guarantees the minimum.
+
+5.9 Output. Threshold = posterior mean; uncertainty = posterior SD; plus the two edge flags.
+
+5.10 Tuning (M01 section 6 ladder). Stage 1 (maxTrials 4) passed. scripts/tune.ts searched
+    stopSd {4, 4.5, 5, 5.5, 6} x prior SD {12, 13.5, 15, 16.5, 18} x same-ear weight {0.4, 0.6,
+    0.8} x other-ear weight {0.15, 0.3, 0.45} x jitter {0, 1, 2, 3} on tuning seed 777 (300 runs
+    each, 900 combinations, 53 passed). Five candidates were then rechecked on seeds 4242 and 9999
+    (1000 runs each, Express and Refine). We chose stopSd 5.5, prior SD 13.5, weights 0.6 and 0.45,
+    jitter 2: it passed on both seeds and keeps the specified jitter. Only then was the validation
+    run made on the fixed seeds (20261109, 20261110), so it is not tuned to them. Margins are thin
+    (95.35% against a 95% target), so any change to the estimator must rerun the suite.
+
+5.11 Known limitation. With at most 4 trials a track can move only about 25 to 30 dB from its
+    prior. For someone whose threshold at a band is far above the prior (or who hears nothing),
+    Express stops below the truth with an SD that looks confident (about 6 dB). In the
+    simulation, 71% of tracks whose truth is past the ceiling are flagged. Refine raises this to
+    86%. This is listed in STATUS.txt as an open question; the fix (a heavier-tailed prior, or more
+    trials when every answer agrees) changes the specified algorithm, so it needs the owner.
+
+6. SIMULATED LISTENER (sim/listener.ts)
+  Psychometric: true sigma 2 dB, lapse 4%, guess 2%; 10% of listeners guess 8 to 12%.
+  Audiogram shapes (equal share): flat-normal (0 to 6 dB), gently sloping (rising to 15 to 40 dB
+    at 8 kHz), steep high-frequency (35 to 60 dB from 4 kHz), notch at 4 kHz (20 to 45 dB deep),
+    mild asymmetric (one ear 10 to 20 dB worse at high frequencies). Every band gets N(0, 3 dB)
+    jitter, clamped to 0 to 60 dB; 1 kHz is clamped to 0 to 5 dB (near normal).
+  Lc uniform in -45 to -20 dBFS.
+  True threshold (dBFS) = Lc - 45 + calibration offset + R(f) + headphone colouring + loss, where
+    the calibration offset is N(0, 5 dB) clamped to +/-12 (people set Lc by ear) and headphone
+    colouring is N(0, 3 dB) per band, shared by both ears. These make the prior genuinely wrong,
+    as it will be for real people.
+  Age range: the starter row nearest the listener's 2, 4 and 8 kHz loss; 20% skip the question.
+  Scoring: a track is scored for accuracy only if its true threshold lies inside the presentable
+  range [-90, ceiling] (no estimator can measure beyond it). Censored tracks are counted
+  separately, with how often the right edge flag was raised.
+
+7. LOSS (hearing/loss.ts)
+  loss(f) = max(0, (theta_f - R(f)) - (theta_ref - R(1000))),  theta in dBFS,
+  theta_ref = the lower (better) of the two ears' 1 kHz thresholds.
+  This assumes the better ear's 1 kHz hearing is near normal, which is typical of mild age-related
+  loss but not universal. If both ears have loss at 1 kHz, all losses read too small. The UI says
+  so (copy id hearingCheck.results.refNote, listed in REGULATORY_REVIEW.txt).
+  headphoneCompensation (dB, per ear and band) is subtracted from each threshold first, including
+  at 1 kHz, so it also moves the reference.
+  Unmeasured bands: PCHIP on log frequency over the measured losses, uncertainty null, labelled
+  "Estimated between measured points" (hearingCheck.results.estimatedBand).
+  Uncertainty at a measured band is that track's posterior SD.
+
+8. RELIABILITY (hearing/reliability.ts)
+  n = catch trials, fa = false alarms (Refine counts its own and the Express ones).
+  High    fa <= max(1, floor(0.15 n)) and every measured track's SD <= 6 dB.
+  Medium  fa <= max(2, floor(0.30 n)) and at most two tracks have SD > 8 dB.
+  Low     anything else.
+  Counts with a floor (max(1, ...)) so one slip with only 6 catch trials does not sink the rating.
+  Consequence: with n = 6 to 8, Low needs 3 or more false alarms. A listener who guesses 10% of
+  the time has about a 2% chance of that (binomial), and for any n their expected count (0.1 n)
+  stays below the Medium limit (0.30 n). The M01 target "at least 80% of high-guess listeners
+  rated Low" is therefore unreachable under this rule. Measured: 1.9%. See STATUS.txt.
+
+9. REFERRAL FLAGS (hearing/referral.ts)
+  Average loss = mean over the eight bands. Reasons returned when:
+    the two ears' averages differ by more than 20 dB;
+    any single band differs by more than 30 dB between ears;
+    either ear's average exceeds 40 dB.
+  These are suggestions to see a hearing professional, never a diagnosis; the UI words them
+  calmly.
+
+10. GAIN (sound/gain.ts)
+  k(loss) = smoothstep(2, 8, loss): 0 at or below 2 dB, 1 at or above 8 dB, 3t^2 - 2t^3 between.
+    Replaces the old hard step at 5 dB, which made a 0.1 dB change in loss jump the gain.
+  gain = k(loss) x min(cap, ratio x loss), then x strength, then min(24, ...).
+  ratio by boost style: Gentle 0.33, Standard 0.5 (default), Strong 0.6. Half-gain is the classic
+    starting point for mild loss; Gentle and Strong bracket it.
+  cap default 18 dB, settable 12 to 24. Strength 0 to 1.5, default 1. Starter profiles are forced
+    to Gentle with a 12 dB cap because they are a guess from age alone.
+  Continuity: the steepest slope is about 2.7 dB of gain per dB of loss (Strong, strength 1.5,
+    inside the knee), so a 0.1 dB change moves gain by under 0.3 dB. The test checks under 0.5 dB
+    over every style, strength and cap.
+
+11. SUMMED-BOOST CLAMP (sound/boostClamp.ts, sound/biquad.ts)
+  Filters, as the graph will build them: personal EQ peaking Q 1.0 at 250 to 6000 Hz, highshelf
+  at 8000 Hz; Speech peak 2500 Hz Q 1.0 (+3 dB); Voice focus 2000 Hz Q 0.7 (up to +6 dB at full
+  strength); Ambient boost 2500 Hz Q 0.8 (0 to 6 dB).
+  Magnitudes use the Web Audio API 1.1 definitions (section 1.13.5, read 2026-11-09): A = 10^(G/40),
+  w0 = 2 pi f0 / Fs, peaking alpha = sin(w0) / (2Q) with linear Q, highshelf alpha =
+  sin(w0)/2 x sqrt(2) (S = 1, Q ignored), and the cookbook b and a coefficients. Fs = 48 kHz.
+  The combined response is the sum in dB of every filter's magnitude on a log grid from 20 Hz to
+  20 kHz, 48 points per octave. Voice focus acts on the mid channel, not on each ear, so adding it
+  to each ear's EQ over-estimates slightly. That errs on the safe side.
+  If the peak exceeds +24 dB, the extras (Speech, Voice focus, Ambient) are scaled by the largest
+  factor in [0, 1] that fits (bisection, 40 steps). If even zero extras is too much, the EQ is
+  scaled the same way. The EQ goes last because it is the part fitted to the person.
+  FINDING for the audio milestone: neighbouring Q 1.0 peaks overlap strongly. Asking for 10 dB in
+  every band produces a 28 dB peak, and a typical sloping prescription peaks at about 2x its band
+  gains. Using the band gains directly as filter gains would therefore overshoot the intended
+  curve and trigger this clamp often. The audio milestone should fit filter gains to the target
+  curve. See STATUS.txt.
+
+12. SETTINGS PRECEDENCE (sound/precedence.ts, sound/presets.ts)
+  Lowest to highest: preset values; the person's manual changes (remembered per profile); Music
+  forces cleanup and Voice focus to 0; this session's changes (only cleanup and Voice focus can be
+  turned back on in Music); Night mode (from the Night preset or a manual change) replaces the
+  compressor stage; Ambient boost adds its own 2500 Hz peak.
+  Presets:
+    Movie   the defaults: strength 1, compressor -24 dBFS / knee 12 / 4:1 / 10 ms / 250 ms,
+            cleanup 0, Voice focus 0 (cleanup needs a download the person starts).
+    Speech  +3 dB peak at 2500 Hz Q 1.0, ratio 3, Voice focus 50%, cleanup 40%.
+    Music   EQ gains x 0.8, ratio 2, threshold -18 dBFS, knee 20 dB, cleanup and Voice focus 0.
+    Night   Night mode Medium, strength 0.8.
+
+13. TIMING AND DURATIONS (timing.ts)
+  Cue ring 200 ms before onset. Tone 350 ms, warble with 5 Hz FM at +/-5%, 20 ms raised-cosine
+  ramps, hard-panned, peak within [-90, -6] dBFS. Response window 1000 ms from onset. After "heard"
+  the next trial may start 300 ms after the tap; after "not heard" at the window's end. Then a
+  random gap of 250 to 450 ms. Slower pace multiplies the window, the post-tap wait and the gaps
+  by 1.5, and turns on automatically for 70 to 79 and 80 plus.
+  Mean tap time for duration estimates: 450 ms after onset (typical simple reaction time to
+  near-threshold tones in people over 50). ASSUMPTION, to be replaced by measured data.
+  expectedDurationSeconds(method, pace) = 4 s calibration + tone trials x (heard share x heard
+  trial + rest x missed trial) + catch trials x missed trial, using the mean counts and heard
+  share from the simulation (src/generated/simStats.ts, checked against a fresh run by the
+  suite), rounded up to the nearest 10 s. Starter is a fixed 5 s. Currently: Express 60 s (80 s
+  slower), Refine 100 s (130 s slower). No UI string may state a duration any other way.
+
+14. RANDOMNESS (rng.ts)
+  All randomness goes through an injectable seeded Rng: sfc32 (PractRand-tested small fast
+  counter generator) seeded through splitmix32. Box-Muller for normals.
+
+15. LISTENING HEALTH (M08)
+
+15.1 Speech-shaped noise
+Target: ANSI S3.5-1997 (R2017) Table 3, standard speech spectrum level, normal vocal effort, one-
+third-octave centres 160 Hz to 8 kHz (dB, spectrum level per Hz): 32.41 34.48 34.75 33.98 34.59
+34.27 32.06 28.30 25.01 23.00 20.15 17.32 13.18 11.55 9.33 5.31 2.59 1.13. Values as reproduced
+by the MoSQITo implementation of the standard (read 2026-11-09). 125 Hz is outside the table and
+taken equal to 160 Hz (flat region), an extrapolation.
+White noise has a flat spectrum level, so the filter's gain follows these values up to a
+constant. IIR approximation: low shelf 772.8 Hz +10.7 dB, peaking 468.2 Hz +4.66 dB Q 0.396,
+peaking 2494.6 Hz -3.78 dB Q 1.16, high shelf 4174.8 Hz -22.85 dB, low-pass 12211 Hz Q 2.378 dB
+(Web Audio formulas, lowpass Q in dB). Fitted by packages/core/scripts/fit-ltass.ts (random search
+minimising the largest deviation after removing the mean). Fit error: at most 0.72 dB from 125 Hz
+to 8 kHz; the unit test requires 2 dB.
+The noise is scaled so its RMS is Lc - 15 dBFS, never above -12 dBFS; the filtered noise's RMS is
+measured with a 2 s offline render rather than derived.
+
+15.2 Digits in noise
+Triplets of three different digits, 300 ms apart, noise from 0.5 s before to 0.5 s after. Diotic.
+Speech (digits at -20 dBFS RMS after trimming and equalising, all within 0.5 dB) is played at
+noise + SNR. Start at 0 dB SNR; all three right: 2 dB harder; otherwise 2 dB easier; clamped to
+[-20, +10] dB. 12 triplets. SRT = mean of the SNRs of triplets 5 to 12 and the SNR the 13th
+would have had. "Not sure" counts as wrong. Indicative categories, approximations that need
+validation: Good at or below -8 dB; Some difficulty above -8 to -4 dB; Considerable difficulty
+above -4 dB.
+
+15.3 Safe-listening tracker
+The calibration tone peaks at Lc dBFS; a sine's RMS is 3 dB below its peak (20 log10(sqrt 2) =
+3.01 dB), so the reference RMS is Lc - 3 dBFS. The final output's stereo power mean is measured
+over each report interval (50 ms), and readings are pooled into one-second means. Comfortable:
+below the reference; Loud: reference to 6 dB above; Very loud: more than 6 dB above. Output below
+-70 dBFS is not counted. The Hearing Check counts each tone at its peak minus 3 dB for its length.
+Only minutes per local day and zone are stored. This is relative to the person's own level, not a
+sound-pressure measurement; changing the computer's volume changes the truth behind it.
+
+16. THE AUDIO PIPELINE (M02; packages/audio, constants.ts)
+16.1 Engine. 48 kHz throughout (ENGINE_SAMPLE_RATE_HZ); files at other rates are resampled first.
+  Every parameter change uses setTargetAtTime: Original | Enhanced and other switches with a
+  30 ms time constant (about 150 ms to settle), sliders with 50 ms. Reason: no clicks (RULES).
+16.2 Chain (buildProcessingGraph.ts). Upmix to stereo and the input meter; Background cleanup
+  (section 17.3); Voice focus; the per-ear EQ (core section 10, after the summed-boost clamp of
+  section 11) with the Speech and Ambient peaks; -3 dB pre-attenuation; the compressor (or Night
+  mode, section 17); the program limiter; the Loudest-sound limiter; the wet gain. A delay-matched
+  dry path runs alongside for Original. Wet and dry are summed, then the master gain, then last on
+  every path the Safety limiter. Program limiter: threshold -3 dBFS, knee 0, ratio 20, attack 3 ms, release
+  100 ms. Compressor "off" (Simulate my hearing): ratio 1 at 0 dBFS, kept in place so the latency
+  never changes.
+16.3 Safety limiter. Fixed ceiling -3 dBFS, true-peak style: 4 x oversampling (16 taps per phase,
+  Kaiser beta 8), 2 ms look-ahead, 100 ms release, ceiling changes smoothed with 50 ms. It is the
+  last processing node on every path and cannot be bypassed. Reason: no setting, file or bug may
+  play louder than this (RULES defence in depth).
+16.4 Overload guard. Any run of samples above -1 dBFS (gaps under 25 ms keep a run going: a
+  20 Hz wave peaks every 25 ms) that lasts 200 ms fades the master to silence over 100 ms and tells
+  the person; sound comes back (over 100 ms) only when they choose to resume.
+16.5 Voice focus. Mid/side: the mid (centre, where dialogue usually sits) rises by up to +4 dB and
+  the side falls by up to -6 dB, scaled by the slider. Core's clamp is told the actual +4 dB.
+  Mono detection: side more than 60 dB under mid for 2 s (100 ms windows; windows quieter than
+  -80 dBFS count for neither) treats the file as mono, where mid/side does nothing useful.
+16.6 Simulate my hearing. The inverse of the profile's loss as cuts: at most 24 dB per filter and
+  40 dB in total at any frequency.
+16.7 Calibration ramp. 1 kHz tone from -60 dBFS rising 1.5 dB every 100 ms (each step ramped over
+  5 ms); the person's "comfortable" tap fixes Lc. Tones are scheduled 50 ms ahead on the audio
+  clock.
+16.8 Offline renderer (exports). 120 s segments with 5 s of pre-roll each (so slow stages such as
+  the rider settle) and 10 ms crossfades at the joins, so a long file renders exactly as it plays.
+  WAV: 16-bit PCM with TPDF dither. MP3: 128, 192 (default), 256 or 320 kbps constant bitrate.
+16.9 Video export (M11). The same render, then AAC at 192 kbps (FFmpeg's native encoder); the video
+  is copied bit for bit. Tested: audio within 50 ms of the source length and 0.5 dB of the WAV
+  render's level.
+16.10 Meters. Readings every 50 ms; loudness as EBU R 128 momentary (400 ms windows, 100 ms
+  blocks), K-weighted with the BS.1770 filters at 48 kHz.
+
+17. NIGHT MODE AND BACKGROUND CLEANUP (M06)
+17.1 Night mode rider. A slow loudness rider before the compressor: BS.1770 K-weighted loudness
+  over a 3 s window in 100 ms blocks; gain rises at most 3 dB per second and falls at most 6 dB
+  per second (it turns sudden loud scenes down faster than it brings quiet ones up); blocks
+  below -60 LUFS are gated (silence never pumps the gain).
+  Levels (target LUFS, largest boost, largest cut):
+    Light  -24, +6 dB, -12 dB
+    Medium -26, +9 dB, -12 dB
+    Strong -28, +12 dB, -15 dB
+17.2 Night mode compressor (after the rider; threshold 6 dB under the target, so it only catches
+  peaks the slow rider lets through):
+    Light  threshold -30 dBFS, knee 10 dB, ratio 3, attack 10 ms, release 250 ms
+    Medium threshold -32 dBFS, knee 8 dB, ratio 5, attack 6 ms, release 200 ms
+    Strong threshold -34 dBFS, knee 6 dB, ratio 8, attack 3 ms, release 150 ms
+  Tested: a 30 dB swing shrinks more at each level, and the output stays inside the safety limits.
+17.3 Background cleanup. RNNoise (BSD-3-Clause) on 480-sample frames (10 ms at 48 kHz) per
+  channel, samples scaled by 32768 for the network. Total added delay is a fixed 480 + 480
+  samples (algorithm plus ring buffer), the same at any strength and when the module is not
+  loaded, so turning cleanup on or off never shifts the picture against the sound. Strength is a
+  linear wet/dry mix, smoothed per sample. Tested: 0 percent nulls against the dry path; 100 percent lowers
+  steady noise by 10 dB or more.
+
+18. QUIET LAB (M09)
+18.1 Hum Filter. Detection: 8192-point spectrum every 500 ms; search +-2 Hz around 50 and 60 Hz;
+  a peak must stand 12 dB above its surroundings, move less than 0.5 Hz for 3 s, and is held 2 s
+  through gaps (released after 6 s without it). The fundamental and the next five harmonics each
+  get two notches (Q 30) stagger-tuned 0.12 percent either side, at most 12 notches: one
+  notch removes 25 dB only within about +-0.04 Hz, closer than the spectrum can estimate; the pair
+  keeps more than 40 dB across +-0.1 Hz of error. The estimate follows changes at 0.3 per update.
+  Notches add no latency. Tested: hum at 49.5 to 60.5 Hz cut by 25 dB or more, speech within 1 dB.
+18.2 Auto Boost. Room level = microphone RMS (dBFS), smoothed with a 2 s attack and 5 s release,
+  with a 3 dB backlash. From -55 dBFS (quiet) to -30 dBFS (loud) the Ambient boost rises linearly
+  from 0 to +6 dB and the compressor threshold falls from 0 to 6 dB; sensitivity moves both
+  thresholds 5 dB (High -60 and -35, Low -50 and -25). Feedback guard: Pearson correlation of the
+  output and microphone envelopes over 10 s above 0.6 for 5 s means the microphone hears the
+  speakers, and the boost freezes. The boost passes through the summed-boost clamp (section 11),
+  so with a strong profile it may add less than +6 dB (open question 16). The microphone never
+  hears the ear: this is a guide, not a measurement.
+18.3 Calm Sounds. Generated on the device: white (xorshift32), pink (Kellet's filter), brown
+  (integrated white with a 20 Hz leak and a 5 Hz DC blocker), rain (500 Hz to 8 kHz band plus
+  droplets), ocean (0.1 Hz swell), and "matched to my ringing" (a one-octave band around the
+  matched pitch). Each is normalised to -20 dBFS RMS (measured over 20 s). Volume is hard-capped
+  inside the graph at Lc - 10 dB, or -24 dBFS without a calibration; no slider value can pass the
+  cap. Pitch match: third-octave steps from 250 Hz to 12.5 kHz, starting at 6 kHz. The sleep
+  timer fades out over 60 s.
+
+19. COMPUTER SPEAKERS (Hearing Check)
+  Speakers reach both ears, so a speakers check measures both ears together: one track per
+  frequency (Express 5, Refine 8), every tone at the requested peak in both channels (identical,
+  as the calibration ramp), and the result copied to both ears (mirrorEars). Thresholds stay
+  relative to Lc as with headphones. What changes is the acoustic path: the room, the distance
+  and the speakers' own response all add to the result, so it is a coarser guide than a headphone
+  check, and differences between the ears cannot be seen.
+

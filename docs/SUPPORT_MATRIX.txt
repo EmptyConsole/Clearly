@@ -1,0 +1,51 @@
+CLEARLY: SUPPORT MATRIX (M14, 2026-11-10)
+Built only from automated runs and feature detection on this machine (macOS 27.0.1, Apple M3).
+"Tested" means a Playwright run passed; "detected" means the feature check returned that value in
+that engine; "not tested" is said plainly. The app never branches on browser names: every row is
+what feature detection decides at run time.
+
+ENGINES TESTED
+  Chromium 158 (Playwright): the full suite (onboarding, Starter and Express, profiles, backup and
+    restore, restore codes, file playback, WAV, MP3 and video export, captions, Listening Health,
+    Quiet Lab, faults, phone emulation, axe on every route in three themes and at 200 percent).
+  WebKit 27.2 (Playwright's Safari engine): e2e/cross/core.spec.ts.
+  Electron 45.2.3 (desktop app): e2e/desktop/smoke.spec.ts.
+  Firefox: NOT TESTED HERE. Playwright's Firefox fails to start on macOS 27 ("Could not find
+    profile folder", with any temporary folder). CI runs the same spec on Linux (ci.yml installs
+    firefox); record its result here after the first CI run.
+  Edge: not tested separately; it is Chromium, so feature detection gives the Chromium column, but
+    no run has confirmed it.
+
+CORE FLOWS                         Chromium   WebKit (Safari)   Firefox      Desktop app
+  Hearing Check (Express)          tested     tested            not tested   tested (Starter)
+  Clear Audio with a file          tested     tested            not tested   tested
+  Original | Enhanced              tested     tested            not tested   tested
+  WAV export                       tested     tested            not tested   via the web code
+  Video export (MP4/MKV)           tested     not tested        not tested   CSP checked
+  Calm Sounds                      tested     tested            not tested   -
+  Captions (files)                 tested     not tested        not tested   -
+  Browser tab sound                yes        no, explained     not tested   n/a: system sound
+                                                                            (Windows) or cable
+
+FEATURE DETECTION (values returned in each engine here)
+                                     Chromium   WebKit 27.2
+  getDisplayMedia                    yes        yes
+  tab audio (suppressLocalAudio-     yes        no
+    Playback constraint)
+  Document Picture-in-Picture        yes        no   -> no floating-captions button
+  AudioContext.setSinkId             yes        no   -> no output-device choice
+  File System Access save picker     yes        no   -> exports download instead
+  WebGPU (navigator.gpu)             yes        yes  -> captions may use the GPU
+  WebCodecs (AudioDecoder)           yes        yes
+  navigator.audioSession             no         yes  -> silent-switch handling on Safari
+
+TAB CAPTURE FALLBACK
+  Where getDisplayMedia exists but tab audio does not (WebKit here, and Firefox by the same
+  detection), Clear Audio does not offer "Choose a tab"; it shows "Enhancing other tabs is not
+  available in this browser" with the desktop app or a file as the way forward (tested in WebKit).
+  Phones: no tab option, with the reason one tap away (tested in phone emulation).
+
+DESKTOP APP CAPTURE (DECISIONS M12)
+  System sound: Windows only (Electron 45 documents loopback for Windows; macOS tested here: not
+  available). Virtual cable: all three systems (wizard tested in Chromium; real cables are manual
+  tests). Linux and Windows are not tested on hardware here.

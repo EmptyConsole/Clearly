@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "name": "rnnoise",
+      "version": "@sapphi-red/web-noise-suppressor 0.4.1 (Shiguredo RNNoise build 2022.2.0)",
+      "url": "https://cdn.jsdelivr.net/npm/@sapphi-red/web-noise-suppressor@0.4.1/dist/rnnoise.wasm",
+      "sha256": "8b60a2ab88fdae2d1a9f940249d0eb072f28ba8e796f7304347b4e07839c8853",
+      "bytes": 152656,
+      "destination": "rnnoise/rnnoise.wasm",
+      "licence": "BSD-3-Clause (RNNoise), Apache-2.0 (WebAssembly build), MIT (package)"
+    },
+    {
+      "name": "rnnoise-simd",
+      "version": "@sapphi-red/web-noise-suppressor 0.4.1 (Shiguredo RNNoise build 2022.2.0)",
+      "url": "https://cdn.jsdelivr.net/npm/@sapphi-red/web-noise-suppressor@0.4.1/dist/rnnoise_simd.wasm",
+      "sha256": "378fd17c294db15ee4e818ba5ef072242a21c8ad7445b483f7f46d7dc4f2c253",
+      "bytes": 157234,
+      "destination": "rnnoise/rnnoise_simd.wasm",
+      "licence": "BSD-3-Clause (RNNoise), Apache-2.0 (WebAssembly build), MIT (package)"
+    },
+    {
+      "name": "ort-mjs",
+      "version": "onnxruntime-web 1.31.0-dev.20260914-8d85527a0",
+      "url": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.31.0-dev.20260914-8d85527a0/dist/ort-wasm-simd-threaded.asyncify.mjs",
+      "sha256": "0966b6105cd936744498aa60df7a22cbd47af3374dbc64a9ab561c08a71e3611",
+      "bytes": 53057,
+      "destination": "ort/ort-wasm-simd-threaded.asyncify.mjs",
+      "licence": "MIT (ONNX Runtime, Microsoft)"
+    },
+    {
+      "name": "ort-wasm",
+      "version": "onnxruntime-web 1.31.0-dev.20260914-8d85527a0",
+      "url": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.31.0-dev.20260914-8d85527a0/dist/ort-wasm-simd-threaded.asyncify.wasm",
+      "sha256": "49871f5a4409519797e127440868a6d1923339d9185907f301a5b2a1d90af082",
+      "bytes": 26861777,
+      "destination": "ort/ort-wasm-simd-threaded.asyncify.wasm",
+      "licence": "MIT (ONNX Runtime, Microsoft)"
+    },
+    {
+      "name": "test-fixture:jfk.wav",
+      "version": "Xenova/transformers.js-docs jfk.wav",
+      "url": "https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/jfk.wav",
+      "sha256": "aa81c2552465568567e670f3823117e633900d16bd6202346a72f3c8464c74c8",
+      "bytes": 1940478,
+      "destination": "test-fixtures/jfk.wav",
+      "licence": "Public domain (1961 inaugural address of John F. Kennedy, a US government work); test only, removed from production builds"
+    },
+    {
+      "name": "whisper-tiny.en_timestamped:config.json",
+      "version": "onnx-community/whisper-tiny.en_timestamped@aeaa13760958",
+      "url": "https://huggingface.co/onnx-community/whisper-tiny.en_timestamped/resolve/aeaa13760958b03fac5062f457d317d3319c3168/config.json",
+      "sha256": "251ea843b5901a99efa58c0b99b8052c6019aa3e7d2baf46693a1128ff606233",
+      "bytes": 2197,
+      "destination": "models/onnx-community/whisper-tiny.en_timestamped/config.json",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-tiny.en_timestamped:generation_config.json",
+      "version": "onnx-community/whisper-tiny.en_timestamped@aeaa13760958",
+      "url": "https://huggingface.co/onnx-community/whisper-tiny.en_timestamped/resolve/aeaa13760958b03fac5062f457d317d3319c3168/generation_config.json",
+      "sha256": "7b2e8451ed5f118e75fdd991409d72119d21d2fef1eba9723f68fb9c57fe5dc9",
+      "bytes": 1646,
+      "destination": "models/onnx-community/whisper-tiny.en_timestamped/generation_config.json",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-tiny.en_timestamped:preprocessor_config.json",
+      "version": "onnx-community/whisper-tiny.en_timestamped@aeaa13760958",
+      "url": "https://huggingface.co/onnx-community/whisper-tiny.en_timestamped/resolve/aeaa13760958b03fac5062f457d317d3319c3168/preprocessor_config.json",
+      "sha256": "a6a76d28c93edb273669eb9e0b0636a2bddbb1272c3261e47b7ca6dfdbac1b8d",
+      "bytes": 339,
+      "destination": "models/onnx-community/whisper-tiny.en_timestamped/preprocessor_config.json",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-tiny.en_timestamped:tokenizer.json",
+      "version": "onnx-community/whisper-tiny.en_timestamped@aeaa13760958",
+      "url": "https://huggingface.co/onnx-community/whisper-tiny.en_timestamped/resolve/aeaa13760958b03fac5062f457d317d3319c3168/tokenizer.json",
+      "sha256": "5eb60cec1e77aeeb6869a2bb5a8e01a84c3fe5d072d75369343021fe6f5310d0",
+      "bytes": 2405679,
+      "destination": "models/onnx-community/whisper-tiny.en_timestamped/tokenizer.json",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-tiny.en_timestamped:tokenizer_config.json",
+      "version": "onnx-community/whisper-tiny.en_timestamped@aeaa13760958",
+      "url": "https://huggingface.co/onnx-community/whisper-tiny.en_timestamped/resolve/aeaa13760958b03fac5062f457d317d3319c3168/tokenizer_config.json",
+      "sha256": "93879c3dccdd4b976f709acd85b44778873f30c275e67026f30ca1e4c975230c",
+      "bytes": 282662,
+      "destination": "models/onnx-community/whisper-tiny.en_timestamped/tokenizer_config.json",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-tiny.en_timestamped:onnx/encoder_model_quantized.onnx",
+      "version": "onnx-community/whisper-tiny.en_timestamped@aeaa13760958",
+      "url": "https://huggingface.co/onnx-community/whisper-tiny.en_timestamped/resolve/aeaa13760958b03fac5062f457d317d3319c3168/onnx/encoder_model_quantized.onnx",
+      "sha256": "697eaa5668bb13343965f423d6002273479b8508f592bd26970735516ed5039e",
+      "bytes": 10097112,
+      "destination": "models/onnx-community/whisper-tiny.en_timestamped/onnx/encoder_model_quantized.onnx",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-tiny.en_timestamped:onnx/decoder_model_merged_quantized.onnx",
+      "version": "onnx-community/whisper-tiny.en_timestamped@aeaa13760958",
+      "url": "https://huggingface.co/onnx-community/whisper-tiny.en_timestamped/resolve/aeaa13760958b03fac5062f457d317d3319c3168/onnx/decoder_model_merged_quantized.onnx",
+      "sha256": "f2df67fbe1cf39c9b050d05029b55e217a9467f3453ae5110e2bcc0f5ba73652",
+      "bytes": 30729881,
+      "destination": "models/onnx-community/whisper-tiny.en_timestamped/onnx/decoder_model_merged_quantized.onnx",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-base.en_timestamped:config.json",
+      "version": "onnx-community/whisper-base.en_timestamped@fa239a41836c",
+      "url": "https://huggingface.co/onnx-community/whisper-base.en_timestamped/resolve/fa239a41836c3305f6beec180e5940f3823ff5b8/config.json",
+      "sha256": "c8a0de5ed8a083565a4319db29d0c210fda35b4d6076c2d711cae53ae00f3cb1",
+      "bytes": 2197,
+      "destination": "models/onnx-community/whisper-base.en_timestamped/config.json",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-base.en_timestamped:generation_config.json",
+      "version": "onnx-community/whisper-base.en_timestamped@fa239a41836c",
+      "url": "https://huggingface.co/onnx-community/whisper-base.en_timestamped/resolve/fa239a41836c3305f6beec180e5940f3823ff5b8/generation_config.json",
+      "sha256": "3479b1f44a07e41db799e22599222fee5816738036def94a39841cb9cdbb4120",
+      "bytes": 1556,
+      "destination": "models/onnx-community/whisper-base.en_timestamped/generation_config.json",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-base.en_timestamped:preprocessor_config.json",
+      "version": "onnx-community/whisper-base.en_timestamped@fa239a41836c",
+      "url": "https://huggingface.co/onnx-community/whisper-base.en_timestamped/resolve/fa239a41836c3305f6beec180e5940f3823ff5b8/preprocessor_config.json",
+      "sha256": "a6a76d28c93edb273669eb9e0b0636a2bddbb1272c3261e47b7ca6dfdbac1b8d",
+      "bytes": 339,
+      "destination": "models/onnx-community/whisper-base.en_timestamped/preprocessor_config.json",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-base.en_timestamped:tokenizer.json",
+      "version": "onnx-community/whisper-base.en_timestamped@fa239a41836c",
+      "url": "https://huggingface.co/onnx-community/whisper-base.en_timestamped/resolve/fa239a41836c3305f6beec180e5940f3823ff5b8/tokenizer.json",
+      "sha256": "5eb60cec1e77aeeb6869a2bb5a8e01a84c3fe5d072d75369343021fe6f5310d0",
+      "bytes": 2405679,
+      "destination": "models/onnx-community/whisper-base.en_timestamped/tokenizer.json",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-base.en_timestamped:tokenizer_config.json",
+      "version": "onnx-community/whisper-base.en_timestamped@fa239a41836c",
+      "url": "https://huggingface.co/onnx-community/whisper-base.en_timestamped/resolve/fa239a41836c3305f6beec180e5940f3823ff5b8/tokenizer_config.json",
+      "sha256": "93879c3dccdd4b976f709acd85b44778873f30c275e67026f30ca1e4c975230c",
+      "bytes": 282662,
+      "destination": "models/onnx-community/whisper-base.en_timestamped/tokenizer_config.json",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-base.en_timestamped:onnx/encoder_model_quantized.onnx",
+      "version": "onnx-community/whisper-base.en_timestamped@fa239a41836c",
+      "url": "https://huggingface.co/onnx-community/whisper-base.en_timestamped/resolve/fa239a41836c3305f6beec180e5940f3823ff5b8/onnx/encoder_model_quantized.onnx",
+      "sha256": "9b4d25507aef3d3a8d718695b8adcb0488e66aad8e884333c3fa73a1c3baa906",
+      "bytes": 23159173,
+      "destination": "models/onnx-community/whisper-base.en_timestamped/onnx/encoder_model_quantized.onnx",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "whisper-base.en_timestamped:onnx/decoder_model_merged_quantized.onnx",
+      "version": "onnx-community/whisper-base.en_timestamped@fa239a41836c",
+      "url": "https://huggingface.co/onnx-community/whisper-base.en_timestamped/resolve/fa239a41836c3305f6beec180e5940f3823ff5b8/onnx/decoder_model_merged_quantized.onnx",
+      "sha256": "afa8065a5f023f6e524417f9459cc09969023dd38149cd4dce16628b2c3a1773",
+      "bytes": 53712196,
+      "destination": "models/onnx-community/whisper-base.en_timestamped/onnx/decoder_model_merged_quantized.onnx",
+      "licence": "MIT (OpenAI Whisper weights; ONNX export by onnx-community)"
+    },
+    {
+      "name": "ffmpeg-core-js",
+      "version": "Clearly build: FFmpeg 5.1.10 + ffmpeg.wasm 0.12.15 bindings, Emscripten 7.0.0",
+      "build": "scripts/ffmpeg-wasm/build.sh",
+      "sha256": "76e79327c12c2cb6272869aa36c1d221004d46cfee3cddf8d8082057a437d951",
+      "bytes": 71212,
+      "destination": "ffmpeg/ffmpeg-core.js",
+      "licence": "LGPL-2.1-or-later (FFmpeg 5.1.10, configured without --enable-gpl, --enable-nonfree or --enable-version3, no external libraries); MIT (ffmpeg.wasm 0.12.15 bindings and fftools patch)",
+      "url": "https://github.com/EmptyConsole/Clearly/releases/download/ffmpeg-core-5.1.10-clearly1/ffmpeg-core.js"
+    },
+    {
+      "name": "ffmpeg-core-wasm",
+      "version": "Clearly build: FFmpeg 5.1.10 + ffmpeg.wasm 0.12.15 bindings, Emscripten 7.0.0",
+      "build": "scripts/ffmpeg-wasm/build.sh",
+      "sha256": "c0653fe94a2ea3219728e81adb81a37885c33771027f269720e3a5e8d038815d",
+      "bytes": 4641610,
+      "destination": "ffmpeg/ffmpeg-core.wasm",
+      "licence": "LGPL-2.1-or-later (FFmpeg 5.1.10, configured without --enable-gpl, --enable-nonfree or --enable-version3, no external libraries); MIT (ffmpeg.wasm 0.12.15 bindings and fftools patch)",
+      "url": "https://github.com/EmptyConsole/Clearly/releases/download/ffmpeg-core-5.1.10-clearly1/ffmpeg-core.wasm"
+    }
+  ]
+}

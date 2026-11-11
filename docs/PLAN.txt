@@ -1,0 +1,219 @@
+CLEARLY: PLAN
+Project memory. Plain text, tracked. Read at the start of every session with STATUS.txt and
+DECISIONS.txt. RULES.md is the higher authority; where this file and RULES.md differ, RULES.md wins.
+
+1. WHAT WE ARE BUILDING
+Clearly helps people with mild hearing loss follow dialogue in TV, films, streaming and music with
+ordinary headphones. A short Hearing Check builds a personal profile; a personal equaliser,
+compressor and limiters then run in real time on a browser tab, system audio (desktop app), a file
+or a demo clip. Around that: Voice focus, Background cleanup, Night mode, Captions, the Quiet Lab
+(Hum Filter, Auto Boost, Calm Sounds) and Listening Health. Not a medical device. All audio
+processing happens on the user's device.
+
+2. ARCHITECTURE
+One TypeScript codebase in a pnpm workspace (Node 24 LTS):
+
+  packages/core       Pure TypeScript. Hearing maths, profile and settings schemas (zod, with
+                      schemaVersion and migrations), the +24 dB band-boost clamp, loudness and
+                      safe-listening maths. No DOM, no Web Audio. Fully unit-testable in Node.
+  packages/audio      Standard Web Audio only, depends on core. buildProcessingGraph(ctx, profile,
+                      settings, io): the single function that builds both the live graph and the
+                      offline export graph. AudioWorklet processors (lookahead limiter, Night-mode
+                      rider, meters). Tested with OfflineAudioContext renders.
+  apps/web            Vite + React 18 + React Router 6 + Zustand + Tailwind (token-driven) + Radix.
+                      Owns AudioEngine (one AudioContext at 48 kHz, created on a user gesture),
+                      the PlatformAdapter interface and WebPlatformAdapter, Dexie storage, copy
+                      (src/copy/en.ts), design tokens (src/design/tokens.json). Ships as the web
+                      app and PWA.
+  apps/server         Optional Fastify 5 API (sync, feedback). The app works fully without it.
+  apps/desktop        Electron. DesktopPlatformAdapter over a typed preload bridge; system audio
+                      capture; native file dialogs; floating captions window.
+
+Heavy modules (RNNoise wasm, Whisper runtime, onnxruntime-web, lamejs, ffmpeg.wasm single-thread,
+pdf-lib) load only on first use by dynamic import. Their binaries are served from the app's own
+origin under /heavy/, populated at build time by `pnpm fetch:heavy` from heavy-manifest.json with
+SHA-256 verification. The app shell's initial JavaScript stays under 250 KB gzipped (check:size).
+
+3. FILE TREE (as of M00; later milestones add to it)
+
+  .github/workflows/ci.yml        typecheck, lint, test, guards, tokens, build, size, e2e
+  .gitignore .gitattributes .editorconfig .nvmrc .prettierrc.json .prettierignore
+  README.md                       empty; written by the owner only
+  RULES.md                        standing rules, read every session
+  heavy-manifest.json             pinned heavy assets (empty in M00)
+  package.json pnpm-workspace.yaml pnpm-lock.yaml
+  tsconfig.base.json              strict base every package extends
+  tsconfig.scripts.json           root scripts, e2e and config files
+  eslint.config.js vitest.config.ts playwright.config.ts
+  assets/fonts/LICENSES.txt       licences of self-hosted fonts
+  docs/
+    PLAN.txt DECISIONS.txt STATUS.txt DESIGN_RESEARCH.txt
+    HEARING_MATH.txt REGULATORY_REVIEW.txt sim-results.txt (generated) perf.txt (generated)
+    (later: PRIVACY, MOBILE, MANUAL_TESTS)
+  e2e/design.spec.ts              Playwright + axe for /design and the not-found route
+  scripts/
+    check-tracked-files.ts        guard: .env, private keys, files over 5 MB outside assets/demo
+    check-ignore-rules.ts         asserts the Markdown rule and key ignore paths
+    check-size.ts                 app-shell initial JS budget from the Vite manifest
+    fetch-heavy.ts                downloads and verifies heavy assets
+    not-built-yet.ts              honest notice for packages whose milestone has not run
+    lib/                          pure logic + unit tests for the scripts above
+    research/measure.ts           design-research measurement tool (Playwright)
+  packages/core/                  M01: hearing maths (see HEARING_MATH.txt)
+    scripts/simulate.ts           1000+1000 fixed-seed runs -> docs/sim-results.txt + generated stats
+    scripts/tune.ts               tuning-ladder grid search
+    src/constants.ts              every number, with its source or reason
+    src/rng.ts math.ts pchip.ts tables.ts timing.ts
+    src/estimator/                levels, Track (Bayesian grid), HearingCheckSession, params
+    src/hearing/                  loss, reliability, referral flags, audiogram builders
+    src/sound/                    gain, biquad, summed-boost clamp, presets, settings precedence
+    src/schemas/                  zod schemas, migrate engine, per-version fixtures
+    src/sim/                      simulated listener, runner, report, accuracy suite
+    src/generated/simStats.ts     generated trial-count constants (checked by the suite)
+  packages/audio/                 M02: Web Audio engine (graph, worklets, tones, renderer, encoders)
+    src/constants.ts              every number, with its source (latency derivation, limiter, guard)
+    src/graph/                    buildProcessingGraph, params (plan from core), compressor stage,
+                                  latency (measured compressor delay, exact delays), wiring
+                                  (topology recorder), worklets (module loading)
+    src/worklets/                 processors.worklet.ts (clearly-limiter, clearly-monitor),
+                                  protocol.ts, scope.d.ts (AudioWorkletGlobalScope types)
+    src/dsp/                      pure DSP: LimiterCore, 4x interpolator, mono detector, overload
+                                  guard, loudness meter, WAV encoder, discontinuity detector
+    src/tone/toneGenerator.ts     warble and calibration ramp
+    src/render/                   renderOffline (segmented), ChunkedSourceReader, AudioBufferReader
+    src/encoders/                 encoder.worker.ts (WAV, MP3 via mediabunny/LAME), sinks
+    src/analysis/                 measurement helpers and test signals ('@clearly/audio/testing')
+    harness/                      development-only page the Playwright audio tests drive
+    licenses/                     NOTICE.txt, MPL-2.0, LAME licence texts
+  e2e/audio/                      Playwright audio tests (Chromium); perf.spec writes docs/perf.txt
+  apps/server/ apps/desktop/   scaffold only
+  apps/web/
+    index.html vite.config.ts vitest.config.ts tsconfig.json tsconfig.node.json
+    scripts/build-tokens.ts       tokens.json -> src/design/generated/{tokens,theme}.css
+    scripts/check-tokens.ts       pnpm check:tokens
+    src/main.tsx src/index.css
+    src/app/router.tsx            routes; /design only in development
+    src/app/NotFound.tsx
+    src/copy/en.ts                every user-facing string
+    src/design/                   tokens.json, model, compile, contrast maths, checker, DesignPage
+    src/app/                      router (lazy routes), Layout, NotFound, RouteError
+    src/platform/                 PlatformAdapter types, WebPlatformAdapter, detect.ts, context
+    src/audio/                    AudioEngine (one AudioContext, silent-switch handling), store
+    src/storage/                  Dexie `clearly` db, zod-validated repositories
+    src/store/                    Zustand profile store
+    src/check/                    Hearing Check screens, CheckRunner (trial timing), PDF
+    src/demo/                     simple demo-clip page (/audio) until M05
+    src/ui/                       shared components (Button, BigButton, Checkbox, Switch, ...)
+    src/test/                     Vitest setup, fakes, test-build hooks
+  e2e/app/                        Playwright app flows (Hearing Check, axe)
+  scripts/review/                 design-review screenshot captures (research/review/)
+
+4. DATA FLOW DIAGRAMS
+
+4.1 Audio chain (single source of truth: RULES.md; built by buildProcessingGraph in packages/audio,
+    final as of M02; M06 replaces the cleanup DelayNode and adds the Night-mode stage, M09 fills
+    the hum notches, all at the same latency)
+
+```mermaid
+flowchart LR
+  SRC[Source: tab, system, file, demo, mic] --> UP[Upmix gain: 2 ch, explicit, speakers]
+  UP --> TAPA((Tap A))
+  TAPA --> CAP[Caption transcriber: hears the original]
+  TAPA --> MONO[Input monitor worklet: mono detection]
+  TAPA --> HUM
+  subgraph WET[Wet path: constant latency 1632 samples]
+    HUM[Hum filter: 6 notch stages, each crossfaded with a bypass; flat when off] --> RNN[Background cleanup slot: DelayNode 960 samples; RNNoise in M06]
+    RNN --> VF[Voice focus: mid/side from gain nodes; mid peak 2 kHz Q0.7 0..+4 dB; side 0..-6 dB]
+    VF --> EQ[Personal EQ per ear: 250 500 1k 2k 3k 4k 6k peaking Q1, 8k highshelf]
+    EQ --> SP[Speech preset peaking 2500 Hz Q1.0]
+    SP --> AB[Ambient boost peaking 2500 Hz Q0.8]
+    AB --> MERGE[Merge ears] --> PRE[-3 dB pre-attenuation]
+    PRE --> COMP[Compressor stage, swappable: -24 dBFS, knee 12, 4:1, 10/250 ms; Night mode in M06]
+    COMP --> PLIM[Program limiter DynamicsCompressor: -3 dBFS, knee 0, 20:1, 3/100 ms]
+    PLIM --> LSL[Loudest-sound limiter worklet: ceiling -24..-6 dBFS, default -12]
+    LSL --> WG[Wet gain]
+  end
+  TAPA --> DLY[Dry DelayNode: 1632 samples = wet latency] --> DG[Dry gain]
+  WG --> SUM((Sum))
+  DG --> SUM
+  SUM --> MASTER[Master gain: overload fade]
+  MASTER --> SAFE[Safety limiter worklet: -3 dBFS fixed, 2 ms lookahead, 4x oversampled peaks]
+  SAFE --> DEST[Destination]
+  SAFE -.-> TAPS[Taps: analyser; output monitor worklet: loudness, safe-listening tracker, overload guard]
+```
+Original | Enhanced crossfades the wet and dry gains (setTargetAtTime, 30 ms time constant); the
+gains always sum to 1 (setBlend). The Safety limiter is the only node connected to the destination
+in every mode, and the graph cannot be built without it (the worklet module loads first, or the
+build rejects). The tone generator plays through its own Safety limiter.
+
+4.1a Latency budget at 48 kHz (measured in Chromium 158, 2026-11-09; see DECISIONS M02)
+
+  Stage                                   samples    ms     source
+  Background cleanup slot                     960   20.00   480 RNNoise frame delay + 480 ring buffer
+  Compressor stage (DynamicsCompressor)       288    6.00   measured at graph build
+  Program limiter (DynamicsCompressor)        288    6.00   measured at graph build
+  Loudest-sound limiter (worklet)              96    2.00   2 ms lookahead
+  = wet path, and the dry-path delay         1632   34.00
+  Safety limiter (worklet, after the sum)      96    2.00   2 ms lookahead
+  = latencySamples (input to output)         1728   36.00   verified by an impulse in both modes
+
+The compressor delay is not part of the Web Audio specification, so buildProcessingGraph measures
+it once per sample rate (an impulse through a DynamicsCompressorNode in an OfflineAudioContext) and
+the budget follows. A browser with a different compressor delay gets a different, still matched,
+latencySamples.
+
+4.2 Data and sync
+
+```mermaid
+flowchart LR
+  UI[React screens] <--> ZS[Zustand UI state]
+  UI --> ENG[AudioEngine]
+  ZS <--> REPO[Repositories: zod-validated, schemaVersion + migrations]
+  REPO <--> DEX[(Dexie / IndexedDB: profiles, settings, hearing-check history, listening log)]
+  REPO --> EXP[Export / import file: zod-validated, fflate]
+  REPO -. optional, user opts in .-> API[apps/server Fastify 5]
+  API --> DB[(SQLite, server data folder, gitignored)]
+  ENG --> PG[packages/audio buildProcessingGraph]
+  PG --> CORE[packages/core maths and schemas]
+  REPO --> CORE
+```
+No analytics or telemetry. The only network traffic is the optional API and downloads the user
+explicitly starts. Audio never leaves the device.
+
+4.3 Platform adapter
+
+```mermaid
+flowchart TB
+  C[Components] -->|read capabilities from React context| CTX[PlatformContext]
+  CTX --> IF{{PlatformAdapter interface: capabilities + listAudioSources, startCapture,
+  saveFile, openFile, show/hideFloatingCaptions, requestPersistentStorage, openExternal}}
+  IF --> WEB[WebPlatformAdapter: feature detection, graceful fallbacks]
+  IF --> DESK[DesktopPlatformAdapter: typed preload bridge]
+  DESK --> PRE[Electron preload: contextBridge, zod-validated IPC]
+  PRE --> MAIN[Electron main: loopback capture, dialogs, floating window]
+```
+Never branch on browser names or user-agent strings. Unavailable capabilities render a plain
+explanation and the best alternative.
+
+5. RISKS
+  Platform limits. Tab-audio capture, Electron loopback, Document Picture-in-Picture and
+    navigator.audioSession differ by browser, OS and version. Mitigation: feature detection, a
+    small test per feature, results recorded in DECISIONS.txt, honest fallbacks in the UI.
+  Headphone variability. Consumer headphones vary by about plus or minus 10 dB across frequency,
+    as large as the mild losses measured, and browsers cannot know output level. Mitigation:
+    results described as approximate and personal to these headphones; optional
+    headphoneCompensation array in the profile schema from day one.
+  Regulatory. Wording could drift into medical claims. Mitigation: banned-word list in RULES.md,
+    every results or health string listed in docs/REGULATORY_REVIEW.txt for professional review
+    before launch. We do not decide regulatory status.
+  Bundle size. Radix, Dexie, pdf-lib, qrcode and audio code could creep into the entry chunk.
+    Mitigation: route-level splitting, check:size in CI on every push (65 KB gzipped at M00).
+  ffmpeg memory. ffmpeg.wasm (single-thread) can exhaust memory on long files or modest laptops.
+    Mitigation: size limits, streaming where possible, a clear error with a way forward, rest of
+    the app unaffected.
+  Real-time performance. Worklets must stay under 15 percent of a render quantum with Background
+    cleanup on. Mitigation: development probe, measured before features stack up.
+  Safety. A bug could let output exceed -3 dBFS. Mitigation: Safety limiter enforced by topology
+    test, hostile-signal offline renders, runtime fade-to-silence watchdog.
+  Toolchain churn. pnpm, TypeScript and ESLint released new majors in 2026 (see DECISIONS.txt).
+    Mitigation: pinned exact versions, lockfile, frozen installs in CI.

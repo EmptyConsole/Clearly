@@ -1,0 +1,23 @@
+CLEARLY: THIRD-PARTY CODE IN PACKAGES/AUDIO
+
+MP3 export (loaded only when someone exports an MP3, by dynamic import inside the encoder worker)
+
+mediabunny 1.62.1
+  Licence: Mozilla Public License 2.0 (MPL-2.0.txt in this folder).
+  Source: https://github.com/Vanilagy/mediabunny
+  Used unmodified, as a separate chunk.
+
+@mediabunny/mp3-encoder 1.62.1
+  Licence: Mozilla Public License 2.0 (MPL-2.0.txt).
+  Source: https://github.com/Vanilagy/mediabunny (packages/mp3-encoder)
+  It contains the LAME MP3 encoder compiled to WebAssembly.
+
+LAME MP3 encoder (inside @mediabunny/mp3-encoder)
+  Licence: GNU Library General Public License, version 2 (LAME-COPYING.txt), with the LAME
+  project's own note on commercial use (LAME-LICENSE.txt).
+  Project and source: https://lame.sourceforge.io/
+  This product uses LAME. LAME is used unmodified. It is shipped as its own lazily loaded file
+  (separate from the app's code), so a user can replace it with another build of LAME, which is
+  what the LGPL asks for a separately linked library.
+
+The app's licences screen (a later milestone) must show these notices and links.

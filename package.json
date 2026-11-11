@@ -1,0 +1,50 @@
+{
+  "name": "clearly",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @clearly/web --filter @clearly/server dev",
+    "dev:desktop": "pnpm --filter @clearly/desktop dev",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r typecheck && tsc -p tsconfig.scripts.json",
+    "lint": "eslint . --max-warnings 0 && prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "package:desktop": "pnpm --filter @clearly/desktop package",
+    "fetch:heavy": "node scripts/fetch-heavy.ts",
+    "build:ffmpeg": "bash scripts/ffmpeg-wasm/build.sh",
+    "check:tokens": "pnpm --filter @clearly/web check:tokens",
+    "check:size": "node scripts/check-size.ts",
+    "check:tracked": "node scripts/check-tracked-files.ts",
+    "check:ignore": "node scripts/check-ignore-rules.ts",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec lint-staged && node scripts/check-tracked-files.ts --staged"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs,json,css,html,yml,yaml}": "prettier --write"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.0",
+    "@types/node": "24.19.2",
+    "eslint": "10.14.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.7",
+    "globals": "17.14.0",
+    "lint-staged": "17.6.0",
+    "prettier": "3.9.10",
+    "simple-git-hooks": "2.14.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.2",
+    "vitest": "5.1.0",
+    "zod": "4.6.7"
+  }
+}

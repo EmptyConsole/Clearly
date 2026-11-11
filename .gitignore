@@ -1,0 +1,81 @@
+# Markdown: only the two root documents are tracked. Project docs are plain text in docs/*.txt.
+*.md
+!/README.md
+!/RULES.md
+
+# Dependencies and package-manager stores
+node_modules/
+.pnpm-store/
+
+# Build output and caches
+dist/
+dist-test/
+build/
+out/
+.vite/
+.turbo/
+*.tsbuildinfo
+
+# CI: the Emscripten SDK cache (setup-emsdk's actions-cache-folder) inside the checkout
+emsdk-cache/
+
+# Test output
+.lighthouseci/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Logs
+*.log
+
+# Environment files, all of them (.env.example holds real local values, so it is not tracked)
+.env
+.env.*
+
+# SQLite and server data
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+apps/server/data/
+apps/server/**/data/
+
+# Electron output
+apps/desktop/release/
+apps/desktop/dist-electron/
+*.exe
+*.dmg
+*.AppImage
+*.msi
+
+# Private keys
+*.pem
+
+# Runtime-downloaded models and WebAssembly (populated by pnpm fetch:heavy)
+apps/web/public/heavy/
+
+# Exports and temporary audio
+*.tmp
+tmp/
+exports/
+
+# Design research screenshots (never committed)
+/research/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Generated from tokens.json at dev, build and typecheck time
+apps/web/src/design/generated/

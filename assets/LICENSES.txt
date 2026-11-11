@@ -1,0 +1,29 @@
+CLEARLY: THIRD-PARTY ASSETS SERVED FROM /heavy/ (fetched by pnpm fetch:heavy, never committed)
+
+rnnoise.wasm and rnnoise_simd.wasm (Background cleanup, M06)
+  Package:  @sapphi-red/web-noise-suppressor 0.4.1 (MIT, Copyright sapphi-red),
+            https://github.com/sapphi-red/web-noise-suppressor
+  Build:    Shiguredo's RNNoise WebAssembly build 2022.2.0 (Apache-2.0, Copyright Shiguredo Inc.),
+            https://github.com/shiguredo/rnnoise-wasm
+  Library:  RNNoise by Jean-Marc Valin / Xiph.Org Foundation (BSD-3-Clause),
+            https://github.com/xiph/rnnoise
+  Sizes and SHA-256: heavy-manifest.json. The app ships the licence texts on its licences
+  screen (M10) and in the release (RELEASE_CHECKLIST.txt).
+
+See also assets/demo/LICENSES.txt (demo audio), assets/fonts/LICENSES.txt (fonts) and
+packages/audio/licenses/ (MP3 encoder).
+
+ffmpeg-core.js and ffmpeg-core.wasm (video export, M11), served from /heavy/ffmpeg/
+  Library:  FFmpeg 5.1.10 (https://ffmpeg.org), LGPL-2.1-or-later. Built by Clearly from the
+            official release tarball with scripts/ffmpeg-wasm/build.sh: no --enable-gpl, no
+            --enable-nonfree, no --enable-version3 and no external libraries; the script stops
+            unless configure reports "LGPL version 2.1 or later".
+  Bindings: ffmpeg.wasm 0.12.15 fftools changes and bind.js (MIT, Copyright 2019 Jerome Wu),
+            https://github.com/ffmpegwasm/ffmpeg.wasm; scripts/ffmpeg-wasm/LICENSE-ffmpeg.wasm.
+  Wrapper:  @ffmpeg/ffmpeg 0.12.15 (MIT), an npm dependency of apps/web.
+  Source:   LGPL-2.1 section 6(d). The build writes the complete corresponding source to
+            /heavy/ffmpeg/source/ (the FFmpeg tarball, the patch, bind.js, the build script,
+            BUILD-INFO.txt with the exact configuration, and COPYING.LGPLv2.1.txt), and the
+            video export's download step links to it. The core is a separate file in the Cache
+            API, so a person can replace it with their own build.
+  Sizes and SHA-256: heavy-manifest.json (tied to Emscripten 7.0.0).

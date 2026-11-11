@@ -1,0 +1,31 @@
+CLEARLY: RELEASE CHECKLIST
+Every item needs a person. Tick each one for each release and each launch market.
+
+[ ] Regulatory review done: a qualified regulatory professional has reviewed
+    docs/REGULATORY_REVIEW.txt for every launch market (for example FDA, EU MDR, UK MHRA).
+[ ] Privacy review done: docs/PRIVACY.txt and the in-app privacy page reviewed; lawful basis for
+    the optional backup (health data) confirmed; retention period (PROFILE_RETENTION_DAYS) agreed.
+[ ] Licences complete and shipped with the release:
+      demo audio and the digit recordings (assets/demo/LICENSES.txt; open question 10: the TTS
+      voice is still not chosen), fonts (assets/fonts/LICENSES.txt), Whisper models and ONNX
+      Runtime, RNNoise (assets/LICENSES.txt), FFmpeg LGPL-2.1-or-later with its source offer at
+      /heavy/ffmpeg/source/ (assets/LICENSES.txt), the MP3 encoder (packages/audio/licenses/),
+      and the npm dependencies (generate the list at release time).
+[ ] Signing certificates, if any: Windows code signing (CSC_LINK, CSC_KEY_PASSWORD) and Apple
+    Developer ID with notarisation (APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID), as CI
+    secrets only. Without them, docs/DESKTOP.txt's first-launch steps apply.
+[ ] Server environment set: RESTORE_CODE_PEPPER (random, at least 32 characters),
+    PAYLOAD_ENCRYPTION_KEY ("<keyId>:<base64 32 bytes>"), TRUST_PROXY (when behind a proxy),
+    ALLOWED_ORIGINS (add clearly://app for the desktop app), PUBLIC_URL, DATABASE_PATH.
+[ ] Desktop build variables set: CLEARLY_SERVER_URL and CLEARLY_DOWNLOAD_URL (open questions 21
+    and 22); web build: VITE_PUBLIC_URL and VITE_DESKTOP_DOWNLOAD_URL.
+[ ] Video tool release copy published (for hosts without Emscripten, such as Vercel): a GitHub
+    release tagged ffmpeg-core-5.1.10-clearly1 with apps/web/public/heavy/ffmpeg/ffmpeg-core.js and
+    ffmpeg-core.wasm attached; heavy-manifest.json checks both against their SHA-256.
+[ ] Heavy assets built and served: pnpm fetch:heavy (needs Emscripten 7.0.0 for the video tool);
+    checksums match heavy-manifest.json.
+[ ] Backups of the server database scheduled and a restore tried.
+[ ] Manual tests run: every section of docs/MANUAL_TESTS.txt on real devices (phones, Windows and
+    macOS desktop app, screen readers), results recorded.
+[ ] Automated suites green in CI: checks, e2e (chromium, audio, desktop, firefox, webkit).
+[ ] docs/STATUS.txt known limitations read and accepted.

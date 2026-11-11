@@ -1,0 +1,13 @@
+pnpm-lock.yaml
+*.md
+**/dist/
+coverage/
+playwright-report/
+test-results/
+research/
+apps/web/public/heavy/
+apps/web/src/design/generated/
+scripts/ffmpeg-wasm/bind.js
+**/dist-test/
+.lighthouseci/
+emsdk-cache/

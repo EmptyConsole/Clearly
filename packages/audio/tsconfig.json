@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"]
+  },
+  "include": ["src"],
+  "exclude": [
+    "src/worklets/processors.worklet.ts",
+    "src/worklets/scope.d.ts",
+    "src/encoders/encoder.worker.ts",
+    "src/**/*.node.test.ts"
+  ]
+}
